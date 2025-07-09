@@ -10,7 +10,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
     const passwordType = showPassword ? "text" : "password";
     const handleForgotPassword =()=>{
-        router.push('/login/forgot-password')
+        router.push('/forgot')
     }
   return (
     <div className="mx-auto mt-50 w-1/2 flex flex-col gap-10">
