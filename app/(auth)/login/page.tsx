@@ -12,9 +12,12 @@ export default function LoginPage() {
     const handleForgotPassword =()=>{
         router.push('/forgot')
     }
+    const handleLogin =()=>{
+      router.push('/admin')
+    }
   return (
     <div className="mx-auto mt-50 w-1/2 flex flex-col gap-10">
-      <h1 className="text-4xl font-bold">Login</h1>
+      <h1 className="text-4xl font-bold font-rob">Login</h1>
       <div className="flex flex-col gap-3 w-full">
         <label className="font-semibold">User ID</label>
         <input
@@ -25,7 +28,7 @@ export default function LoginPage() {
           className="bg-gray-200 appearance-none border-2 border-gray-300 rounded w- py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-black"
         />
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col ">
             <label className="font-semibold">Password</label>
             <div className="flex relative">
               <input
@@ -43,7 +46,7 @@ export default function LoginPage() {
             </div>
           </div>
       <button className="w-full rounded-md py-1 hover:border-purple-300 border-2 border-black bg-black text-white" onClick={handleForgotPassword}>Forgot Password?</button>
-      <button className="w-full rounded-md py-1 hover:border-purple-300 border-2 border-black">Log In</button>
+      <button className="w-full rounded-md py-1 hover:border-purple-300 border-2 border-black" onClick={handleLogin}>Log In</button>
     </div>
   );
 }
