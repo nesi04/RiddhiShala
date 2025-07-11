@@ -42,8 +42,8 @@ export default function LoginPage() {
               </button>
             </div>
           </div>
-      <button className="w-full rounded-md py-1 hover:border-purple-300 border-2 border-black" onClick={handleForgotPassword}>Forgot Password?</button>
-      <button className="w-full">Log In</button>
+      <button className="w-full rounded-md py-1 hover:border-purple-300 border-2 border-black bg-black text-white" onClick={handleForgotPassword}>Forgot Password?</button>
+      <button className="w-full rounded-md py-1 hover:border-purple-300 border-2 border-black">Log In</button>
     </div>
   );
 }
