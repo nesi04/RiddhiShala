@@ -1,20 +1,11 @@
+// app/admin/layout.tsx
+import React from "react";
 
-import { SidebarDemo } from '@/components/Sidebar'
-import { SidebarProvider } from '@/components/ui/sidebar'
-import React from 'react'
-
-export default function AdminLayout({
-    children,
-}:{children:React.ReactNode}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-   
-     <SidebarProvider>
-        <SidebarDemo></SidebarDemo>
-      <main>
-        
-        {children}
-      </main>
-      </SidebarProvider> 
-    
-  )
+    <section className="min-h-screen bg-gray-100">
+      {/* This wraps all admin pages — each page should decide if it needs sidebar */}
+      {children}
+    </section>
+  );
 }
