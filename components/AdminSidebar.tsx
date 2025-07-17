@@ -37,12 +37,12 @@ const AdminSidebar = () => {
       </div>
       <nav>
         <ul className="space-y-2">
-          <SidebarLink href="/dashboard" label="Dashboard" icon={<LayoutDashboard size={20} />} />
-          <SidebarLink href="/logs" label="Logs" icon={<List size={20} />} />
-          <SidebarLink href="/settings" label="Settings" icon={<Settings size={20} />} />
-          <SidebarLink href="/profile" label="Profile" icon={<User size={20} />} />
-          <SidebarLink href="/reports" label="Progress Report" icon={<FileText size={20} />} />
-          <SidebarLink href="/flags" label="Flagged Issues" icon={<Flag size={20} />} />
+          <SidebarLink href="/admin" label="Dashboard" icon={<LayoutDashboard size={20} />} />
+          <SidebarLink href="/admin/logs" label="Logs" icon={<List size={20} />} />
+          <SidebarLink href="/admin/settings" label="Settings" icon={<Settings size={20} />} />
+          <SidebarLink href="/admin/profile" label="Profile" icon={<User size={20} />} />
+          <SidebarLink href="/admin/reports" label="Progress Report" icon={<FileText size={20} />} />
+          <SidebarLink href="/admin/flags" label="Flagged Issues" icon={<Flag size={20} />} />
         </ul>
       </nav>
     </aside>

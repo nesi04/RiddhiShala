@@ -1,11 +1,19 @@
-// app/admin/layout.tsx
-import React from "react";
+"use client";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+import AdminSidebar from "@/components/AdminSidebar";
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <section className="min-h-screen bg-gray-100">
-      {/* This wraps all admin pages — each page should decide if it needs sidebar */}
-      {children}
-    </section>
+    <div className="flex min-h-screen">
+      {/* Sidebar with full height */}
+      <div className="w-64 bg-gray-200 h-screen">
+        <AdminSidebar />
+      </div>
+
+      {/* Main content fills remaining space */}
+      <div className="flex-1 p-6 overflow-auto">
+        {children}
+      </div>
+    </div>
   );
 }
