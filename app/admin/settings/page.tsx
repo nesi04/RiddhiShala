@@ -45,7 +45,7 @@ const SettingsPage = () => {
         </header>
 
         {/* Settings Content */}
-        <main className="flex-1 bg-gray-100 dark:bg-gray-900 p-8 overflow-y-scroll">
+        <main className="flex-1 bg-gray-100 dark:bg-gray-900 p-8 ">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Account Settings</h2>
             <div className="grid grid-cols-1 gap-4">
