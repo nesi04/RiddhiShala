@@ -6,7 +6,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen">
       {/* Sidebar with full height */}
-      <div className="w-64 bg-gray-200 h-screen">
+      <div className="w-64 bg-gray-200  ">
         <AdminSidebar />
       </div>
 
