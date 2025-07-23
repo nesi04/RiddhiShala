@@ -9,23 +9,40 @@ export default function LoginPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const passwordType = showPassword ? "text" : "password";
 
-  const handleForgotPassword = () => {
-    router.push('/forgot');
-  }
-
-  const handleFirstTimeReset = () => {
-    router.push('/reset');
-  }
+  // Hardcoded credentials for demo purposes
+  const DEMO_CREDENTIALS = {
+    phone: "9876543210",
+    email: "demo@example.com",
+    password: "password123"
+  };
 
   const handleLogin = () => {
-    // Authentication logic would go here
-    router.push('/admin');
-  }
+    setError("");
+    
+    // Validate credentials
+    let isValid = false;
+    
+    if (loginMethod === "phone") {
+      isValid = phone === DEMO_CREDENTIALS.phone && 
+                password === DEMO_CREDENTIALS.password;
+    } else {
+      isValid = email === DEMO_CREDENTIALS.email && 
+                password === DEMO_CREDENTIALS.password;
+    }
+
+    if (isValid) {
+      // Store simple auth state in localStorage
+      localStorage.setItem('isAuthenticated', 'true');
+      router.push('/admin');
+    } else {
+      setError("Invalid credentials. Use phone: 9876543210 or email: demo@example.com with password: password123");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -36,6 +53,13 @@ export default function LoginPage() {
       <div className="flex items-center justify-center py-16 px-6">
         <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md border border-gray-200">
           <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">Login to Your Account</h1>
+
+          {/* Error message */}
+          {error && (
+            <div className="mb-4 p-2 bg-red-100 text-red-700 rounded-md text-sm">
+              {error}
+            </div>
+          )}
 
           {/* Login Method Toggle */}
           <div className="flex mb-6 border border-gray-300 rounded-md overflow-hidden">
@@ -84,7 +108,7 @@ export default function LoginPage() {
                   <input
                     type="email"
                     value={email}
-                    placeholder="your.email@example.com"
+                    placeholder="demo@example.com"
                     onChange={(e) => setEmail(e.target.value)}
                     className="bg-gray-50 border border-gray-300 rounded-md w-full py-2 px-10 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
@@ -99,7 +123,7 @@ export default function LoginPage() {
                 <input
                   type={passwordType}
                   value={password}
-                  placeholder="Enter your password"
+                  placeholder="password123"
                   onChange={(e) => setPassword(e.target.value)}
                   className="bg-gray-50 border border-gray-300 rounded-md w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent pr-10"
                 />
@@ -112,35 +136,11 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* First-time User Checkbox */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="firstTimeUser"
-                checked={isFirstTimeUser}
-                onChange={(e) => setIsFirstTimeUser(e.target.checked)}
-                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-              />
-              <label htmlFor="firstTimeUser" className="ml-2 block text-sm text-gray-700">
-                First time user? Need to set/reset password
-              </label>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center justify-between">
-              <button
-                onClick={handleForgotPassword}
-                className="text-sm text-green-700 hover:text-green-800 hover:underline"
-              >
-                Forgot Password?
-              </button>
-            </div>
-
             <button
-              onClick={isFirstTimeUser ? handleFirstTimeReset : handleLogin}
+              onClick={handleLogin}
               className="w-full bg-green-700 hover:bg-green-800 text-white font-medium py-2 px-4 rounded-md transition duration-200"
             >
-              {isFirstTimeUser ? "Reset Password" : "Log In"}
+              Log In
             </button>
           </div>
         </div>

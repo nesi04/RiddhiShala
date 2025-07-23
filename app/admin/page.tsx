@@ -1,17 +1,25 @@
 "use client";
-import { ChevronRight, School } from "lucide-react";
+import { ChevronRight, Router, School } from "lucide-react";
 import FlaggedIssuesSection from "@/components/admin/FlaggedIssuesSection";
 import Link from "next/link";
 import DataCompletionStats from "@/components/admin/DataCompletionStats";
 import OverallProgressSection from "@/components/admin/OverviewSection";
 import Header from "@/components/Header";
+import withAuth from "@/components/withAuth";
+import { useRouter } from "next/navigation";
+import { logout } from "@/utils/auth";
 
 const App = () => {
+  const router = useRouter();
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Government Header Banner */}
       <Header />
-      
+
       {/* Main Content */}
       <div className="max-w-7xl mx-auto py-8 px-6">
         {/* Overall Progress Section */}
@@ -42,4 +50,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default withAuth(App);

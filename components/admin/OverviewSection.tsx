@@ -11,6 +11,12 @@ type UserRole = 'School Admins' | 'Teachers' | 'Students' | string;
 const OverallProgressSection = () => {
   const router = useRouter();
 
+  const handleRoleClick = (role: string) => {
+    // Convert role to URL-friendly format (lowercase, replace spaces with hyphens)
+    const rolePath = role.toLowerCase().replace(/\s+/g, '-').replace('/', '-');
+    router.push(`/admin/users/${rolePath}`);
+  };
+
   // Icons mapping for different roles with proper typing
   const roleIcons: Record<UserRole, React.JSX.Element> = {
     'School Admins': <School className="text-green-600" size={24} />,
@@ -37,9 +43,8 @@ const OverallProgressSection = () => {
         {userData.slice(0, 3).map((user, index) => (
           <div
             key={index}
-            onClick={() => router.push(user.link)}
+            onClick={() => handleRoleClick(user.role)}
             className="cursor-pointer group flex flex-col items-center justify-between min-h-[12rem] bg-white border border-gray-200 rounded-xl p-6 transition-all hover:border-green-500 hover:shadow-md overflow-hidden"
-
           >
             <div className="flex flex-col items-center text-center">
               <div className="h-12 w-12 bg-green-50 rounded-full flex items-center justify-center mb-3 group-hover:bg-green-100 transition">

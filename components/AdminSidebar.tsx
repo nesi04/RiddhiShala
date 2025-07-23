@@ -85,23 +85,18 @@ const AdminSidebar = () => {
             icon={<Users size={20} />} 
             isActive={pathname.startsWith('/admin/users')}
           />
-          <SidebarLink 
+          {/* <SidebarLink 
             href="/admin/curriculum" 
             label="Curriculum" 
             icon={<BookOpen size={20} />} 
             isActive={pathname.startsWith('/admin/curriculum')}
           />
+          */}
           <SidebarLink 
-            href="/admin/assessments" 
-            label="Assessments" 
-            icon={<ClipboardCheck size={20} />} 
-            isActive={pathname.startsWith('/admin/assessments')}
-          />
-          <SidebarLink 
-            href="/admin/reports" 
+            href="/admin/progress" 
             label="Progress Reports" 
             icon={<FileText size={20} />} 
-            isActive={pathname.startsWith('/admin/reports')}
+            isActive={pathname.startsWith('/admin/progress')}
           />
           <SidebarLink 
             href="/admin/flags" 
@@ -109,6 +104,12 @@ const AdminSidebar = () => {
             icon={<Flag size={20} />} 
             isActive={pathname.startsWith('/admin/flags')}
           />
+          <SidebarLink 
+            href="/admin/logs" 
+            label="Logs" 
+            icon={<ClipboardCheck size={20} />} 
+            isActive={pathname.startsWith('/admin/logs')}
+          /> 
         </ul>
 
         {/* Settings Section */}

@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Home, Users, Plus, Download, ChevronDown } from 'lucide-react';
 import UserGrid from '@/components/UserGrid';
+import withAuth from '@/components/withAuth';
 
 const UserManagementPage = () => {
   return (
@@ -138,4 +139,4 @@ const UserManagementPage = () => {
   );
 };
 
-export default UserManagementPage;
+export default withAuth(UserManagementPage);
