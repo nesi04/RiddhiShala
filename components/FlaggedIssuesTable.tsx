@@ -46,7 +46,7 @@ export default function FlaggedIssuesTable() {
 
   return (
     <div className="p-4 bg-gray-100 rounded-md">
-      <h2 className="text-xl font-bold mb-4">Flagged Issues</h2>
+      
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2 mb-4">

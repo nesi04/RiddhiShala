@@ -12,7 +12,7 @@ export default function IssueDetailsPage({ params }: IssueDetailsProps) {
 
   return (
     <div className="p-6 min-h-screen">
-      <h1 className="text-2xl font-bold mb-6">Admin’s Dashboard - Issues Details</h1>
+      <h1 className="text-2xl font-bold mb-6">Issues Details</h1>
 
       <div className="bg-gray-100 p-6 rounded grid grid-cols-2 gap-8 max-w-4xl">
         <div>
