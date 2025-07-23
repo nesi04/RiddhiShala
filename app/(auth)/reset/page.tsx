@@ -11,7 +11,7 @@ export default function LoginPage() {
 
 
   return (
-    <div className="mx-auto mt-20 w-1/2 flex flex-col gap-10">
+    <div className="mx-auto mt-50 w-1/2 flex flex-col gap-10">
       <h1 className="text-4xl font-bold">Reset Password</h1>
       <input
           type="text"
