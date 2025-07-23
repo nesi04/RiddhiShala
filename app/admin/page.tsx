@@ -1,45 +1,43 @@
-import React from "react";
-import { LucideChevronRight } from "lucide-react";
-import FlaggedIssuesSection from "@/components/FlaggedIssuesSection";
+"use client";
+import { ChevronRight, School } from "lucide-react";
+import FlaggedIssuesSection from "@/components/admin/FlaggedIssuesSection";
 import Link from "next/link";
-import DataCompletionStats from "@/components/DataCompletionStats";
-import OverallProgressSection from "@/components/OverviewSection";
-
+import DataCompletionStats from "@/components/admin/DataCompletionStats";
+import OverallProgressSection from "@/components/admin/OverviewSection";
+import Header from "@/components/Header";
 
 const App = () => {
   return (
-    <div className="bg-gray-100 min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="bg-white shadow-md py-4 px-6 flex justify-between items-center">
-        <div className="text-2xl font-semibold text-gray-800">
-          Admin Dashboard
-        </div>
-        <div className="rounded-full bg-gray-300 h-10 w-10"></div>
-      </header>
-
+    <div className="min-h-screen bg-gray-50">
+      {/* Government Header Banner */}
+      <Header />
+      
       {/* Main Content */}
-      <div className="flex flex-1">
-       
-        <main className="flex-grow p-6">
-          {/* Overall Progress Section */}
-          <section>
-            <OverallProgressSection/>
-            <div className="w-full rounded-full bg-gray-200 flex justify-center items-center py-5">
-              <Link href={'/admin/schools'} className="text-2xl font-semibold">
-               View All Schools 
-              </Link>
-            </div>
-          </section>
+      <div className="max-w-7xl mx-auto py-8 px-6">
+        {/* Overall Progress Section */}
+        <section className="mb-8">
+          <OverallProgressSection />
+          <div className="w-full group relative overflow-hidden rounded-lg bg-gradient-to-r from-green-50 to-gray-50 hover:from-green-100 hover:to-gray-100 transition-all duration-300 shadow-sm border border-gray-200 hover:border-green-300 mt-6">
+            <Link
+              href={'/admin/schools'}
+              className="flex items-center justify-center py-5 px-6 transition-colors duration-200"
+            >
+              <span className="text-lg font-semibold text-green-700 group-hover:text-green-800 flex items-center">
+                View All Schools
+                <ChevronRight
+                  className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </span>
+            </Link>
+          </div>
+        </section>
 
-          {/* Flagged Issues Section */}
-         <FlaggedIssuesSection/>
+        {/* Flagged Issues Section */}
+        <FlaggedIssuesSection />
 
-          {/* Data Completion Stats Section */}
-          <DataCompletionStats/>
-        </main>
+        {/* Data Completion Stats Section */}
+        <DataCompletionStats />
       </div>
-
-      {/* Footer */}
     </div>
   );
 };

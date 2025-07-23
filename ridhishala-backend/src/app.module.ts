@@ -1,53 +1,25 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { HttpModule } from '@nestjs/axios';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { KeycloakConnectModule } from 'nest-keycloak-connect';
 import { APP_GUARD } from '@nestjs/core';
-import configuration from 'src/config/configuration';
-import { UserApi } from './api/user-api';
-import { KeycloakService } from './keycloak/keycloak.service';
-import { KeycloakConnectModule, AuthGuard, ResourceGuard, RoleGuard } from 'nest-keycloak-connect';
+import { AuthGuard, KeycloakConnectOptions } from 'nest-keycloak-connect';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
-    HttpModule,
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [configuration],
-    }),
-    KeycloakConnectModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const authServerUrl = configService.get<string>('KEYCLOAK_DOMAIN');
-        const realm = configService.get<string>('KEYCLOAK_REALM');
-        const clientId = configService.get<string>('KEYCLOAK_ADMIN_CLIENT_ID');
-        const secret = configService.get<string>('KEYCLOAK_ADMIN_CLIENT_SECRET');
-        if (!authServerUrl || !realm || !clientId || !secret) {
-          throw new Error('Missing Keycloak configuration');
-        }
-        return {
-          authServerUrl,
-          realm,
-          clientId,
-          secret,
-        };
-      },
-    }),
+    KeycloakConnectModule.register({
+      authServerUrl: 'http://localhost:8080',
+      realm: 'riddhishala',
+      clientId: 'Ridhishala-client',
+      secret: 'zCcqOcE6YRVSSbNHHBWMDCGAzMeDHxgN',
+      logLevels: ['verbose']
+    } as KeycloakConnectOptions),
+    AdminModule
   ],
-  controllers: [AppController, UserApi],
-  providers: [AppService, KeycloakService , {
-    provide: APP_GUARD,
-    useClass: AuthGuard,
-  },
-  {
-    provide: APP_GUARD,
-    useClass: ResourceGuard,
-  },
-  {
-    provide: APP_GUARD,
-    useClass: RoleGuard,
-  },],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AppModule {}
