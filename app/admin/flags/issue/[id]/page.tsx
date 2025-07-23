@@ -8,7 +8,7 @@ type IssueDetailsProps = {
 };
 
 export default function IssueDetailsPage({ params }: IssueDetailsProps) {
-  const issue = flaggedIssues.find((item) => item.id === params.id);
+  const issue = flaggedIssues.find((item) => item.id === String(params.id));
 
   if (!issue) return notFound();
 
@@ -90,9 +90,9 @@ export default function IssueDetailsPage({ params }: IssueDetailsProps) {
                 <h2 className="text-lg font-semibold text-gray-800 mb-2">Attachment</h2>
                 <div className="border border-gray-200 rounded overflow-hidden">
                   {issue.attachmentUrl ? (
-                    <img 
-                      src={issue.attachmentUrl} 
-                      alt="Issue attachment" 
+                    <img
+                      src={issue.attachmentUrl}
+                      alt="Issue attachment"
                       className="w-full h-64 object-contain bg-gray-100"
                     />
                   ) : (
