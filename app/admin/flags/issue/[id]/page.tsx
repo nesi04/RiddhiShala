@@ -3,12 +3,8 @@ import { notFound } from "next/navigation";
 import { Flag, Home } from "lucide-react";
 import Link from "next/link";
 
-type IssueDetailsProps = {
-  params: { id: string };
-};
-
-export default function IssueDetailsPage({ params }: IssueDetailsProps) {
-  const issue = flaggedIssues.find((item) => item.id === String(params.id));
+export default function IssueDetailsPage({ params }: { params: { id: string } }) {
+  const issue = flaggedIssues.find((item) => item.id === params.id);
 
   if (!issue) return notFound();
 

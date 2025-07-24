@@ -157,4 +157,4 @@ const UserManagementPage = () => {
   );
 };
 
-export default withAuth(UserManagementPage);
+export default UserManagementPage;
