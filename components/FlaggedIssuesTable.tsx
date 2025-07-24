@@ -3,22 +3,21 @@
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { flaggedIssues } from "../constants/flaggedIssues";
-import { 
-  Flag, Search, Filter, ChevronDown, AlertTriangle, 
-  AlertCircle, AlertOctagon, CheckCircle2, Clock, 
+import {
+  Flag, Search, Filter, ChevronDown, AlertTriangle,
+  AlertCircle, AlertOctagon, CheckCircle2, Clock,
   School
 } from "lucide-react";
+import dayjs from "dayjs";
 
 export default function FlaggedIssuesTable() {
   const router = useRouter();
 
-  // Filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSchool, setSelectedSchool] = useState("All");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
 
-  // Unique filter options
   const { schoolOptions, categoryOptions, statusOptions } = useMemo(() => {
     const schools = new Set(flaggedIssues.map(issue => issue.school));
     const categories = new Set(flaggedIssues.map(issue => issue.category));
@@ -30,7 +29,6 @@ export default function FlaggedIssuesTable() {
     };
   }, []);
 
-  // Filter logic
   const filteredIssues = useMemo(() => {
     return flaggedIssues.filter(issue => {
       const matchesSearch =
@@ -51,7 +49,6 @@ export default function FlaggedIssuesTable() {
     router.push(`/admin/flags/issue/${id}`);
   };
 
-  // Get icon based on severity
   const getSeverityIcon = (severity: string) => {
     switch(severity?.toLowerCase()) {
       case 'critical': return <AlertOctagon className="text-red-600" size={16} />;
@@ -60,7 +57,6 @@ export default function FlaggedIssuesTable() {
     }
   };
 
-  // Get status badge
   const getStatusBadge = (status: string) => {
     switch(status?.toLowerCase()) {
       case 'resolved': 
@@ -89,14 +85,13 @@ export default function FlaggedIssuesTable() {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      {/* Table Header with Filters */}
       <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <h2 className="text-lg font-semibold text-gray-800 flex items-center">
             <Flag className="text-red-500 mr-2" size={20} />
             Flagged Issues
           </h2>
-          
+
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <div className="relative flex-1">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -164,26 +159,15 @@ export default function FlaggedIssuesTable() {
         </div>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Issue
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Reported
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                School
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Category
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reported</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">School</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -205,7 +189,7 @@ export default function FlaggedIssuesTable() {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{new Date(issue.timestamp).toLocaleDateString()}</div>
+                  <div className="text-sm text-gray-900">{dayjs(issue.timestamp).format("YYYY-MM-DD")}</div>
                   <div className="text-sm text-gray-500">{issue.reporter}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -224,7 +208,6 @@ export default function FlaggedIssuesTable() {
         </table>
       </div>
 
-      {/* Empty state */}
       {filteredIssues.length === 0 && (
         <div className="p-6 text-center">
           <Flag className="mx-auto h-12 w-12 text-gray-400" />
@@ -235,7 +218,6 @@ export default function FlaggedIssuesTable() {
         </div>
       )}
 
-      {/* Footer with pagination */}
       {filteredIssues.length > 0 && (
         <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 flex items-center justify-between">
           <div className="text-sm text-gray-500">
