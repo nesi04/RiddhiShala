@@ -1,13 +1,26 @@
+"use client";
+
 import { flaggedIssues } from "@/constants/flaggedIssues";
-import { notFound } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Flag, Home } from "lucide-react";
 import Link from "next/link";
+import { useEffect } from "react";
 
-export default function IssueDetailsPage({ params }: { params: { id: string } }) {
-  const issue = flaggedIssues.find((item) => item.id === params.id);
+export default function IssueDetailsPage() {
+  const { id } = useParams();
+  const router = useRouter();
 
-  if (!issue) return notFound();
+  const issue = flaggedIssues.find((item) => item.id === id);
 
+  // If not found, redirect to 404 or a fallback
+  useEffect(() => {
+    if (!issue) {
+      router.replace("/not-found"); // You can create a custom not-found page
+    }
+  }, [issue, router]);
+
+  if (!issue) return null; // Prevents rendering before redirect
+  
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Page Header */}
