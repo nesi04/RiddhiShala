@@ -6,7 +6,7 @@ import { ChevronRight, Home, School } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from "react";
 
-export default function Flags() {
+export default function SchoolPage() {
     const [showModal, setShowModal] = useState(false);
   
     const handleAddUser = (data: any) => {
