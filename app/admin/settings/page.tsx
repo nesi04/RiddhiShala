@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Footer from '@/components/Footer'; // Use absolute path if your tsconfig supports it
-
+import Footer from '@/components/Footer';
 import {
   LayoutDashboard,
   List,
@@ -18,92 +17,125 @@ import {
   HelpCircle,
   LogOut,
   Moon,
+  ChevronRight,
+  ArrowRight,
 } from "lucide-react";
+import { useRouter } from 'next/navigation';
+import { logout } from '@/utils/auth';
 
 const SettingsPage = () => {
+    const router = useRouter();
+    const handleLogout = () => {
+      logout();
+      router.push('/login');
+    };
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
-
-     
-
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-
         {/* Header */}
-        <header className="bg-white dark:bg-gray-700 shadow">
+        <header className="bg-white dark:bg-gray-800 shadow-sm">
           <div className="flex items-center justify-between h-16 px-6">
-            <div className="text-gray-700 dark:text-gray-100 font-semibold">Settings</div>
-            <div className="relative">
-              <button
-                className="rounded-full h-10 w-10 bg-gray-300 dark:bg-gray-600 flex items-center justify-center"
-                aria-label="User Profile"
-              >
-                <User size={20} />
+            <h1 className="text-xl font-semibold text-gray-800 dark:text-white">Settings</h1>
+            <div className="flex items-center space-x-4">
+              <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <HelpCircle className="text-gray-500 dark:text-gray-400" size={20} />
+              </button>
+              <button className="relative">
+                <div className="h-9 w-9 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white">
+                  <User size={18} />
+                </div>
               </button>
             </div>
           </div>
         </header>
 
         {/* Settings Content */}
-        <main className="flex-1 bg-gray-100 dark:bg-gray-900 p-8 ">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Account Settings</h2>
-            <div className="grid grid-cols-1 gap-4">
-              <SettingRow label="Change Email" action="Edit" icon={<Mail size={16} />} />
-              <SettingRow label="Change Password" action="Edit" icon={<Lock size={16} />} />
-              <SettingRow label="View Login History" action="View" icon={<History size={16} />} />
-              <SettingRow label="Theme Mode" action="Toggle" icon={<Sun size={16} />} additionalContent={<ThemeSwitcher />} />
-              <SettingRow label="Help & Support" action="Open" icon={<HelpCircle size={16} />} />
-            </div>
-            <div className="mt-6">
-              <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                <LogOut className="inline mr-2" size={18} />
-                Log Out
-              </button>
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Account Settings</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage your account preferences</p>
+              </div>
+              
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                <SettingRow 
+                  label="Change Email" 
+                  description="Update your email address" 
+                  icon={<Mail size={18} className="text-blue-500" />} 
+                />
+                <SettingRow 
+                  label="Change Password" 
+                  description="Set a new password" 
+                  icon={<Lock size={18} className="text-green-500" />} 
+                />
+                <SettingRow 
+                  label="Login History" 
+                  description="View recent account activity" 
+                  icon={<History size={18} className="text-purple-500" />} 
+                />
+                <div className="p-4 flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                      {typeof window !== "undefined" && document.documentElement.classList.contains("dark") ? (
+                        <Moon size={18} className="text-amber-500" />
+                      ) : (
+                        <Sun size={18} className="text-amber-500" />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-white">Theme</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Switch between light and dark mode</p>
+                    </div>
+                  </div>
+                  <ThemeSwitcher />
+                </div>
+                <SettingRow 
+                  label="Help & Support" 
+                  description="Get help with your account" 
+                  icon={<HelpCircle size={18} className="text-red-500" />} 
+                />
+              </div>
+
+              <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                <button onClick={handleLogout} className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                  <LogOut size={18} />
+                  <span className="font-medium">Sign Out</span>
+                </button>
+              </div>
             </div>
           </div>
         </main>
-
-        {/* Footer */}
-      
       </div>
     </div>
   );
 };
 
-const SidebarLink = ({ href, label, icon }: { href: string; label: string; icon: React.ReactNode }) => (
-  <li>
-    <Link href={href} className="flex items-center space-x-2 text-gray-700 dark:text-gray-200 hover:text-blue-600">
-      {icon}
-      <span>{label}</span>
-    </Link>
-  </li>
-);
-
 const SettingRow = ({
   label,
-  action,
+  description,
   icon,
-  additionalContent,
 }: {
   label: string;
-  action: string;
+  description: string;
   icon: React.ReactNode;
-  additionalContent?: React.ReactNode;
 }) => {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700">
-      <div className="flex items-center space-x-2 text-gray-900 dark:text-white">
-        {icon}
-        <span>{label}</span>
+    <Link href="#" className="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
+            {icon}
+          </div>
+          <div>
+            <h3 className="font-medium text-gray-900 dark:text-white">{label}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>
+          </div>
+        </div>
+        <ChevronRight className="text-gray-400" size={18} />
       </div>
-      <div className="flex items-center space-x-4">
-        {additionalContent}
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          {action}
-        </button>
-      </div>
-    </div>
+    </Link>
   );
 };
 
@@ -116,13 +148,19 @@ const ThemeSwitcher = () => {
     const html = document.documentElement;
     html.classList.toggle("dark");
     setIsDarkMode(html.classList.contains("dark"));
+    // You might want to save preference to localStorage here
+    localStorage.setItem('theme', html.classList.contains("dark") ? 'dark' : 'light');
   };
 
   return (
-    <button onClick={toggleTheme} className="focus:outline-none">
-      {isDarkMode ? <Moon size={20} className="text-gray-700 dark:text-gray-100" /> : <Sun size={20} className="text-gray-700" />}
+    <button 
+      onClick={toggleTheme}
+      className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 dark:bg-gray-600 transition-colors"
+    >
+      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+        isDarkMode ? 'translate-x-6' : 'translate-x-1'
+      }`} />
     </button>
-    
   );
 };
 

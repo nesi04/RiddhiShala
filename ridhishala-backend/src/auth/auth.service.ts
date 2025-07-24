@@ -1,3 +1,4 @@
+
 import {
   Injectable,
   UnauthorizedException,
@@ -14,6 +15,7 @@ import { Role } from '@prisma/client';
 @Injectable()
 export class AuthService {
   constructor(
+
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
   ) {}
@@ -316,6 +318,7 @@ export class AuthService {
     return crypto.createHash('sha256').update(token).digest('hex');
   }
 }
+
 
 
 

@@ -9,7 +9,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="w-64 bg-gray-200  ">
         <AdminSidebar />
       </div>
-
       {/* Main content fills remaining space */}
       <div className="flex-1 p-6 overflow-auto">
         {children}
