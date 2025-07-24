@@ -1,12 +1,21 @@
 "use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { Home, Users, Plus, Download, ChevronDown } from 'lucide-react';
-import UserGrid from '@/components/UserGrid';
-import withAuth from '@/components/withAuth';
+import React, { useState } from "react";
+import Link from "next/link";
+import { Home, Users, Plus, Download, ChevronDown } from "lucide-react";
+import UserGrid from "@/components/UserGrid";
+import withAuth from "@/components/withAuth";
+import UserModal from "@/components/forms/AddUserForm";
 
 const UserManagementPage = () => {
+  const [showModal, setShowModal] = useState(false);
+
+  const handleAddUser = (data: any) => {
+    console.log("New user added:", data);
+    // Add your user logic here
+    setShowModal(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Page Header */}
@@ -29,7 +38,10 @@ const UserManagementPage = () => {
               User Management
             </h1>
             <div className="flex space-x-3">
-              <button className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center">
+              <button
+                onClick={() => setShowModal(true)}
+                className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center"
+              >
                 <Plus className="mr-2" size={16} />
                 Add User
               </button>
@@ -78,13 +90,13 @@ const UserManagementPage = () => {
                   <option value="">All Roles</option>
                   <option value="state">State Admin</option>
                   <option value="district">District Admin</option>
-                  <option value="deo">DEO</option>
                   <option value="cluster">Cluster</option>
                   <option value="block">Block</option>
                   <option value="trainer">Trainer</option>
                   <option value="principal">Principal</option>
                   <option value="teacher">Teacher</option>
                   <option value="student">Student</option>
+                  <option value="deo">Data Entry Operator</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
               </div>
@@ -135,6 +147,12 @@ const UserManagementPage = () => {
           <UserGrid />
         </div>
       </div>
+
+      <UserModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSubmit={handleAddUser}
+      />
     </div>
   );
 };

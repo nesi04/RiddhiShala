@@ -1,8 +1,19 @@
+'use client'
+import SchoolModal from "@/components/forms/AddSchoolForm";
+import UserModal from "@/components/forms/AddUserForm";
 import SchoolTable from "@/components/SchoolTable";
 import { ChevronRight, Home, School } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from "react";
 
 export default function Flags() {
+    const [showModal, setShowModal] = useState(false);
+  
+    const handleAddUser = (data: any) => {
+      console.log("New user added:", data);
+      // Add your user logic here
+      setShowModal(false);
+    };
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Page Header */}
@@ -35,7 +46,7 @@ export default function Flags() {
               All Registered Schools
             </h2>
             <div className="flex space-x-3">
-              <button className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-md text-sm font-medium transition">
+              <button  onClick={() => setShowModal(true)}className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-md text-sm font-medium transition">
                 Add New School
               </button>
               <button className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition">
@@ -64,6 +75,12 @@ export default function Flags() {
           </div>
         </div>
       </div>
+      <SchoolModal
+              isOpen={showModal}
+              onClose={() => setShowModal(false)}
+              onSubmit={handleAddUser}
+            />
+          
     </div>
   );
 }
