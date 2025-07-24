@@ -212,7 +212,7 @@ const ProgressReportDetail = () => {
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Report Not Found</h1>
           <p className="text-gray-600 mb-6">The requested report could not be found.</p>
-          <Link href="/admin/ProgressReports" className="inline-flex items-center text-green-700 hover:underline">
+          <Link href="/admin/progress" className="inline-flex items-center text-green-700 hover:underline">
             <ChevronLeft size={18} className="mr-1" /> Back to all reports
           </Link>
         </div>
@@ -227,7 +227,7 @@ const ProgressReportDetail = () => {
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
         <div className="mb-6">
-          <Link href="/admin/ProgressReports" className="inline-flex items-center text-green-700 hover:underline">
+          <Link href="/admin/progress" className="inline-flex items-center text-green-700 hover:underline">
             <ChevronLeft size={18} className="mr-1" /> Back to all reports
           </Link>
         </div>

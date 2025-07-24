@@ -77,7 +77,7 @@ const DataCompletionStats = () => {
     <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-gray-800">Data Completion Progress</h2>
-        <Link href="/admin/ProgressReports" className="text-green-700 hover:underline text-sm font-medium">
+        <Link href="/admin/progress" className="text-green-700 hover:underline text-sm font-medium">
           View Detailed Reports
         </Link>
       </div>
