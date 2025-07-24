@@ -1,9 +1,19 @@
+"use client";
 import FlaggedIssuesTable from "@/components/FlaggedIssuesTable";
-import React from "react";
-import { Flag, Filter, Plus, Download, ChevronDown, Home } from "lucide-react";
+import Modal from "@/components/Modal";
+import AddFlagForm from "@/components/forms/AddFlagForm";
+import { Flag, Plus, Download, Home } from "lucide-react";
 import Link from "next/link";
+import React, { useState } from "react";
 
 export default function Flags() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleAddFlag = (data: any) => {
+    console.log("Submitted flag data:", data);
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Page Header */}
@@ -26,9 +36,12 @@ export default function Flags() {
               Flagged Issues Management
             </h1>
             <div className="flex space-x-3">
-              <button className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center">
+              <button
+                className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center"
+                onClick={() => setIsModalOpen(true)}
+              >
                 <Plus className="mr-2" size={16} />
-                New Flag
+                Add Flag
               </button>
               <button className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition flex items-center">
                 <Download className="mr-2" size={16} />
@@ -45,6 +58,11 @@ export default function Flags() {
           <FlaggedIssuesTable />
         </div>
       </div>
+
+      {/* Modal */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add New Flag">
+        <AddFlagForm onSubmit={handleAddFlag} />
+      </Modal>
     </div>
   );
 }

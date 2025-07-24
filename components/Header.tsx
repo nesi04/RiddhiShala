@@ -4,6 +4,7 @@ import Image from 'next/image';
 import React from 'react';
 import Emblem_of_Meghalaya from '../assets/Emblem_of_Meghalaya.png';
 import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const Header = () => {
   const pathname = usePathname();
@@ -51,7 +52,7 @@ const Header = () => {
 
         {isAdminDashboard && (
           <div className="h-10 w-10 rounded-full bg-green-100 border-2 border-green-700 flex items-center justify-center text-green-800 font-medium">
-            A
+            <Link href ='/admin/profile'>A</Link> 
           </div>
         )}
       </div>
