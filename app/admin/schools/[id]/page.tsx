@@ -9,12 +9,13 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useParams } from 'next/navigation';
 
-type SchoolDetailsProps = {
-  params: { id: string };
-};
 
-export default function SchoolDetailsPage({ params }: SchoolDetailsProps) {
+
+export default function SchoolDetailsPage() {
+  const params = useParams();
+  const schoolId = params?.id as string;
   const school = schools.find((item) => item.id === params.id);
   const [activeTab, setActiveTab] = useState('basic');
 
