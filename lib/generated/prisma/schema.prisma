@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int          @id @default(autoincrement())
+  name          String
+  phoneNumber   String       @unique
+  email         String       @unique
+  roleId        Int
+  role          Role         @relation(fields: [roleId], references: [id])
+  permissions   Permission[] @relation("UserPermissions")
+  joinDate      DateTime     @default(now())
+  resetPassword Boolean      @default(false)
+  isDisabled    Boolean      @default(false)
+
+  // Relation to school (optional for roles tied to schools)
+  schoolId Int?
+  school   School? @relation(fields: [schoolId], references: [id])
+
+  @@map("users")
+}
+
+model Role {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique // state_user, district, cluster, hos, student, teacher, data_entry_operator
+  users       User[]
+  permissions Permission[] @relation("RolePermissions")
+
+  @@map("roles")
+}
+
+model Permission {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+  users       User[]  @relation("UserPermissions")
+  roles       Role[]  @relation("RolePermissions")
+
+  @@map("permissions")
+}
+
+model School {
+  id                  Int     @id @default(autoincrement())
+  name                String
+  yearOfEstablishment Int?
+  upgradedTo          String?
+  udiseCode           String?
+  district            String?
+  block               String?
+  cluster             String?
+  villageTown         String?
+  management          String?
+  schoolType          String?
+  mediumOfInstruction String?
+  inclusiveSchool     Boolean @default(false)
+  facilitiesForCWSN   String?
+  vocationalTrades    String?
+  availableCourses    String?
+  coEducation         String?
+  campusType          String?
+  totalArea           String?
+  campusSize          String?
+
+  // Relation back to users
+  users User[]
+
+  // Role-specific details
+  headOfSchool       HeadOfSchool?
+  teachers           Teacher[]
+  students           Student[]
+  dataEntryOperators DataEntryOperator[]
+
+  @@map("schools")
+}
+
+model HeadOfSchool {
+  id                        Int       @id @default(autoincrement())
+  schoolId                  Int       @unique
+  school                    School    @relation(fields: [schoolId], references: [id])
+  name                      String
+  designation               String?
+  holdingChargeSince        String?
+  academicQualification     String?
+  professionalQualification String?
+  dateOfJoining             DateTime?
+  teachingExperience        String?
+  contactNumber             String?
+  email                     String?
+
+  @@map("head_of_school")
+}
+
+model Teacher {
+  id            Int     @id @default(autoincrement())
+  schoolId      Int
+  school        School  @relation(fields: [schoolId], references: [id])
+  name          String
+  subject       String?
+  qualification String?
+  experience    String?
+  contactNumber String?
+  email         String?
+
+  @@map("teachers")
+}
+
+model Student {
+  id            Int       @id @default(autoincrement())
+  schoolId      Int
+  school        School    @relation(fields: [schoolId], references: [id])
+  name          String
+  grade         String?
+  section       String?
+  dob           DateTime?
+  contactNumber String?
+  email         String?
+
+  @@map("students")
+}
+
+model DataEntryOperator {
+  id            Int     @id @default(autoincrement())
+  schoolId      Int
+  school        School  @relation(fields: [schoolId], references: [id])
+  name          String
+  contactNumber String?
+  email         String?
+
+  @@map("data_entry_operators")
+}
