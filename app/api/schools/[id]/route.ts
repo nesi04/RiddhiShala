@@ -3,8 +3,11 @@ import { PrismaClient } from "@/lib/generated/prisma";
 
 const prisma = new PrismaClient();
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function GET(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params;
 
   try {
     const school = await prisma.school.findUnique({
@@ -18,9 +21,13 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     return NextResponse.json(school);
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
+
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
   const { id } = params;
@@ -58,4 +65,4 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+}  
