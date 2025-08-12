@@ -29,28 +29,32 @@ export async function GET(
 }
 
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params;
   try {
     const body = await req.json();
-
     const updatedSchool = await prisma.school.update({
       where: { id: Number(id) },
       data: body,
     });
-
     return NextResponse.json(updatedSchool);
   } catch (error) {
     console.error(error);
-    if ((error as any).code === 'P2025') { // Prisma record not found error
+    if ((error as any).code === "P2025") {
       return NextResponse.json({ error: "School not found" }, { status: 404 });
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  const { id } = params;
+export async function DELETE(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params; // ✅ await the params in Next.js 15+
 
   try {
     await prisma.school.delete({
@@ -60,9 +64,9 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     return NextResponse.json({ message: "School deleted successfully" });
   } catch (error) {
     console.error(error);
-    if ((error as any).code === 'P2025') { // Prisma record not found error
+    if ((error as any).code === "P2025") {
       return NextResponse.json({ error: "School not found" }, { status: 404 });
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}  
+}
