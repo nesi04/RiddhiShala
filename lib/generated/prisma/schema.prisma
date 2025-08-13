@@ -8,28 +8,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            Int          @id @default(autoincrement())
-  name          String
-  phoneNumber   String       @unique
-  email         String       @unique
-  roleId        Int
-  role          Role         @relation(fields: [roleId], references: [id])
-  permissions   Permission[] @relation("UserPermissions")
-  joinDate      DateTime     @default(now())
-  resetPassword Boolean      @default(false)
-  isDisabled    Boolean      @default(false)
-
-  // Relation to school (optional for roles tied to schools)
-  schoolId Int?
-  school   School? @relation(fields: [schoolId], references: [id])
-
-  @@map("users")
-}
+// ---------------------- Roles & Permissions ----------------------
 
 model Role {
   id          Int          @id @default(autoincrement())
-  name        String       @unique // state_user, district, cluster, hos, student, teacher, data_entry_operator
+  name        String       @unique
   users       User[]
   permissions Permission[] @relation("RolePermissions")
 
@@ -46,8 +29,44 @@ model Permission {
   @@map("permissions")
 }
 
+// ---------------------- Users ----------------------
+
+model User {
+  id              Int          @id @default(autoincrement())
+  name            String
+  email           String       @unique
+  phoneNumber     String       @unique
+  password        String // hashed password
+  roleId          Int
+  role            Role         @relation(fields: [roleId], references: [id])
+  permissions     Permission[] @relation("UserPermissions")
+  joinDate        DateTime     @default(now())
+  lastActive      DateTime?
+  isDisabled      Boolean      @default(false)
+  assignedSchools UserSchool[]
+  address         String?
+  bio             String?
+  district        String?
+
+  @@map("users")
+}
+
+// ---------------------- User ↔ School (Many-to-Many) ----------------------
+
+model UserSchool {
+  id       Int    @id @default(autoincrement())
+  userId   Int
+  schoolId Int
+  user     User   @relation(fields: [userId], references: [id])
+  school   School @relation(fields: [schoolId], references: [id])
+
+  @@unique([userId, schoolId], name: "userId_schoolId")
+}
+
+// ---------------------- Schools ----------------------
+
 model School {
-  id                  Int     @id @default(autoincrement())
+  id                  Int      @id @default(autoincrement())
   name                String
   yearOfEstablishment Int?
   upgradedTo          String?
@@ -59,26 +78,37 @@ model School {
   management          String?
   schoolType          String?
   mediumOfInstruction String?
-  inclusiveSchool     Boolean @default(false)
-  facilitiesForCWSN   String?
+  inclusiveSchool     Boolean  @default(false)
   vocationalTrades    String?
-  availableCourses    String?
-  coEducation         String?
-  campusType          String?
+  coEducation         Boolean?
   totalArea           String?
+  campusType          String?
   campusSize          String?
 
-  // Relation back to users
-  users User[]
-
-  // Role-specific details
+  // Role-specific relations
   headOfSchool       HeadOfSchool?
   teachers           Teacher[]
   students           Student[]
   dataEntryOperators DataEntryOperator[]
 
+  // Infrastructure & Labs
+  infrastructures Infrastructure[]
+  labs            Lab[]
+
+  // PM-SHRI Pillars
+  pmShriPillars PMShriPillar[]
+
+  // Innovations, Achievements, Challenges
+  innovations Innovation[]
+  challenges  Challenge[]
+
+  assignedUsers UserSchool[]
+
+  @@unique([name, district], name: "name_district")
   @@map("schools")
 }
+
+// ---------------------- Role-Specific Models ----------------------
 
 model HeadOfSchool {
   id                        Int       @id @default(autoincrement())
@@ -98,15 +128,18 @@ model HeadOfSchool {
 }
 
 model Teacher {
-  id            Int     @id @default(autoincrement())
-  schoolId      Int
-  school        School  @relation(fields: [schoolId], references: [id])
-  name          String
-  subject       String?
-  qualification String?
-  experience    String?
-  contactNumber String?
-  email         String?
+  id                  Int      @id @default(autoincrement())
+  schoolId            Int
+  school              School   @relation(fields: [schoolId], references: [id])
+  name                String
+  gender              String?
+  subject             String?
+  qualification       String?
+  experience          String?
+  contactNumber       String?
+  email               String?
+  classesTaking       String?
+  attendedIECTraining Boolean?
 
   @@map("teachers")
 }
@@ -116,11 +149,13 @@ model Student {
   schoolId      Int
   school        School    @relation(fields: [schoolId], references: [id])
   name          String
+  gender        String?
   grade         String?
   section       String?
   dob           DateTime?
   contactNumber String?
   email         String?
+  cwsn          Boolean?
 
   @@map("students")
 }
@@ -134,4 +169,73 @@ model DataEntryOperator {
   email         String?
 
   @@map("data_entry_operators")
+}
+
+// ---------------------- Infrastructure & Labs ----------------------
+
+model Infrastructure {
+  id       Int     @id @default(autoincrement())
+  schoolId Int
+  school   School  @relation(fields: [schoolId], references: [id])
+  facility String
+  quantity Int?
+  status   String?
+  remarks  String?
+  photoUrl String?
+}
+
+model Lab {
+  id        Int     @id @default(autoincrement())
+  schoolId  Int
+  school    School  @relation(fields: [schoolId], references: [id])
+  labType   String
+  available Boolean
+  equipment String?
+  remarks   String?
+  photoUrl  String?
+}
+
+// ---------------------- PM-SHRI Pillars ----------------------
+
+model PMShriPillar {
+  id           Int     @id @default(autoincrement())
+  schoolId     Int
+  school       School  @relation(fields: [schoolId], references: [id])
+  pillar       String
+  subAspect    String
+  observations String?
+  remarks      String?
+  photoUrl     String?
+}
+
+// ---------------------- Innovations & Achievements ----------------------
+
+model Innovation {
+  id          Int     @id @default(autoincrement())
+  schoolId    Int
+  school      School  @relation(fields: [schoolId], references: [id])
+  type        String // Teaching innovation / Community knowledge / Award
+  description String
+  photoUrl    String?
+}
+
+// ---------------------- Challenges & Support ----------------------
+
+model Challenge {
+  id            Int     @id @default(autoincrement())
+  schoolId      Int
+  school        School  @relation(fields: [schoolId], references: [id])
+  area          String
+  challenge     String
+  supportNeeded String?
+}
+
+model OtpVerification {
+  id        Int      @id @default(autoincrement())
+  email     String?
+  phone     String?
+  roleId    Int
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
