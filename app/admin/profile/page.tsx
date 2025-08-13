@@ -1,77 +1,114 @@
+"use client";
 
-import React from 'react';
-import { Search, User, Settings, Bell, LogOut } from "lucide-react";
+import React from "react";
+import { Settings, Activity, Users } from "lucide-react";
+import { useRouter } from "next/navigation"; // ✅ Correct import for App Router
 
-const App = () => {
-  const activityData = [
-    { userId: 'John Doe', loginAttempts: 3 },
-    { userId: 'Jane Smith', loginAttempts: 5 },
-    { userId: 'David Lee', loginAttempts: 2 },
-  ];
+export default function AdminDashboard() {
+  const user = {
+    name: "John Doe",
+    role: "Administrator",
+    profilePic: "", // Leave empty to test letter avatar
+  };
+
+  const router = useRouter();
+
+  const handleSettingsClick = () => {
+    router.push("/admin/settings");
+  };
+
+  const handleActivityLogsClick = () => {
+    router.push("/admin/logs");
+  };
+
+  const handleManageUsersClick = () => {
+    router.push("/admin/users");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.push("/login");
+  };
+
+  // Function to render avatar (either image or letter)
+  const renderAvatar = (size = "md") => {
+    const sizeClasses =
+      size === "sm"
+        ? "w-10 h-10 text-sm"
+        : size === "lg"
+        ? "w-24 h-24 text-3xl"
+        : "w-12 h-12 text-lg";
+
+    if (user.profilePic) {
+      return (
+        <img
+          src={user.profilePic}
+          alt="Profile"
+          className={`${size === "lg"
+              ? "rounded-full border-4 border-green-700"
+              : "rounded-full border-2 border-white"
+            } object-cover ${sizeClasses}`}
+        />
+      );
+    } else {
+      return (
+        <div
+          className={`${sizeClasses} rounded-full bg-green-700 text-white flex items-center justify-center font-bold`}
+        >
+          {user.name.charAt(0).toUpperCase()}
+        </div>
+      );
+    }
+  };
 
   return (
-    <div className="bg-gray-50 min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="bg-white shadow-md p-4  sticky top-0 z-10">
-        <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center">
-            <img
-              src="https://www.svgrepo.com/show/508699/landscape-placeholder.svg"
-              alt="Logo"
-              className="h-8 w-8 mr-2 rounded-full"
-            />
-            <h1 className="text-xl font-semibold text-gray-800">Admin Dashboard - Activity Logs</h1>
-          </div>
-
-
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              
-            </div>
-
-            <div className="flex items-center">
-              
-            </div>
-            
-          </div>
-
-        </div>
+    <div className="min-h-screen bg-gray-50 text-gray-800">
+      {/* Top Bar */}
+      <header className="w-full bg-white text-black px-6 py-4 flex justify-between items-center shadow">
+        <h1 className="text-xl font-bold">Admin Dashboard - Profile</h1>
+        <div className="flex items-center space-x-3">{renderAvatar("sm")}</div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto p-6 flex-grow">
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <table className="min-w-full table-auto">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Number of Login Attempts
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {activityData.map((item, index) => (
-                <tr key={index}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {item.userId}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {item.loginAttempts}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Profile Section */}
+      <section className="max-w-4xl mx-auto mt-8 px-4">
+        <div className="bg-white p-6 rounded-lg shadow-md text-center">
+          <div className="flex justify-center">{renderAvatar("lg")}</div>
+          <h2 className="mt-4 text-lg font-semibold">{user.name}</h2>
+          <p className="text-gray-500">{user.role}</p>
         </div>
-      </main>
 
-      {/* Footer */}
-     
+        {/* Action Buttons */}
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <button
+            onClick={handleSettingsClick}
+            className="flex items-center justify-center bg-green-600 text-white py-3 rounded-lg shadow hover:bg-green-700 transition"
+          >
+            <Settings className="mr-2" size={18} /> Settings
+          </button>
+          <button
+            onClick={handleActivityLogsClick}
+            className="flex items-center justify-center bg-blue-600 text-white py-3 rounded-lg shadow hover:bg-blue-700 transition"
+          >
+            <Activity className="mr-2" size={18} /> Activity Logs
+          </button>
+          <button
+            onClick={handleManageUsersClick}
+            className="flex items-center justify-center bg-purple-600 text-white py-3 rounded-lg shadow hover:bg-purple-700 transition"
+          >
+            <Users className="mr-2" size={18} /> Manage Users
+          </button>
+        </div>
+
+        {/* Logout Button */}
+        <div className="mt-6 text-center">
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 text-white py-2 px-6 rounded-lg shadow hover:bg-red-700 transition"
+          >
+            Log Out
+          </button>
+        </div>
+      </section>
     </div>
   );
-};
-
-export default App;
+}
