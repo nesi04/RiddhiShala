@@ -55,22 +55,40 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const userId = Number(id);
+  const schoolId = Number(id);
+
+  if (isNaN(schoolId)) {
+    return NextResponse.json({ error: "Invalid school ID" }, { status: 400 });
+  }
 
   try {
-    // First delete all UserSchool relations for the user
+    // Optional: Check if exists
+    const existing = await prisma.school.findUnique({
+      where: { id: schoolId },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: "School not found" }, { status: 404 });
+    }
+
+    // First delete related UserSchool entries
     await prisma.userSchool.deleteMany({
-      where: { userId }
+      where: { schoolId }
     });
 
-    // Then delete the user
-    await prisma.user.delete({
-      where: { id: userId }
+    // Then delete the school
+    await prisma.school.delete({
+      where: { id: schoolId },
     });
 
-    return NextResponse.json({ message: "User deleted successfully" });
-  } catch (err) {
+    return NextResponse.json({ message: "School deleted successfully" });
+  } catch (err: any) {
     console.error(err);
-    return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });
+
+    // Handle Prisma-specific "not found" error
+    if (err.code === "P2025") {
+      return NextResponse.json({ error: "School not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ error: "Failed to delete school" }, { status: 500 });
   }
 }
