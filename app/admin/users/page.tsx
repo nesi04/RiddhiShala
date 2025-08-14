@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Home, Users, Plus, Download, ChevronDown } from "lucide-react";
 import UserGrid from "@/components/UserGrid";
@@ -9,11 +9,40 @@ import UserModal from "@/components/forms/AddUserForm";
 
 const UserManagementPage = () => {
   const [showModal, setShowModal] = useState(false);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleAddUser = (data: any) => {
-    console.log("New user added:", data);
-    // Add your user logic here
-    setShowModal(false);
+  // Fetch users from API
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/users");
+      const data = await res.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleAddUser = async (data: any) => {
+    try {
+      const res = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const newUser = await res.json();
+      setUsers((prev) => [...prev, newUser]);
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error adding user:", error);
+    }
   };
 
   return (
@@ -58,93 +87,16 @@ const UserManagementPage = () => {
       <div className="max-w-7xl mx-auto px-6 pb-6 mt-5">
         {/* Filters Section */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="relative">
-              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
-                Search Users
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  id="search"
-                  placeholder="Search by name, email or role"
-                  className="pl-10 pr-4 py-2 w-full rounded-md border border-gray-300 focus:ring-1 focus:ring-green-500 focus:border-green-500"
-                />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-                Role
-              </label>
-              <div className="relative">
-                <select
-                  id="role"
-                  className="pl-3 pr-8 py-2 w-full rounded-md border border-gray-300 focus:ring-1 focus:ring-green-500 focus:border-green-500 appearance-none"
-                >
-                  <option value="">All Roles</option>
-                  <option value="state">State Admin</option>
-                  <option value="district">District Admin</option>
-                  <option value="cluster">Cluster</option>
-                  <option value="block">Block</option>
-                  <option value="trainer">Trainer</option>
-                  <option value="principal">Principal</option>
-                  <option value="teacher">Teacher</option>
-                  <option value="student">Student</option>
-                  <option value="deo">Data Entry Operator</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
-              <div className="relative">
-                <select
-                  id="status"
-                  className="pl-3 pr-8 py-2 w-full rounded-md border border-gray-300 focus:ring-1 focus:ring-green-500 focus:border-green-500 appearance-none"
-                >
-                  <option value="">All Statuses</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="pending">Pending</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="district" className="block text-sm font-medium text-gray-700 mb-1">
-                District
-              </label>
-              <div className="relative">
-                <select
-                  id="district"
-                  className="pl-3 pr-8 py-2 w-full rounded-md border border-gray-300 focus:ring-1 focus:ring-green-500 focus:border-green-500 appearance-none"
-                >
-                  <option value="">All Districts</option>
-                  <option value="east">East District</option>
-                  <option value="west">West District</option>
-                  <option value="north">North District</option>
-                  <option value="south">South District</option>
-                  <option value="central">Central District</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
-              </div>
-            </div>
-          </div>
+          {/* Add filters here if needed */}
         </div>
 
         {/* User Grid */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <UserGrid />
+          {loading ? (
+            <div className="p-6 text-center text-gray-500">Loading users...</div>
+          ) : (
+            <UserGrid users={users} refreshUsers={fetchUsers} />
+          )}
         </div>
       </div>
 

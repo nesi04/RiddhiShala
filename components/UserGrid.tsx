@@ -1,17 +1,39 @@
-'use client'
+'use client';
 import React from 'react';
-import { userData } from '../constants/userData';
 import { useRouter } from 'next/navigation';
 import { 
   Users, MapPin, Layers, BookOpen, UserCheck, School, GraduationCap, UserCog, BookUser 
 } from 'lucide-react';
 
-const UserGrid = () => {
+interface Role {
+  name: string;
+}
+
+interface User {
+  id: number;
+  role: Role;
+  isDisabled: boolean;
+}
+
+interface UserGridProps {
+  users: User[];
+  refreshUsers?: () => void;
+}
+
+const UserGrid: React.FC<UserGridProps> = ({ users }) => {
   const router = useRouter();
 
-  // Icon mapping for different user roles
-  const getRoleIcon = (role: string) => {
-    switch(role.toLowerCase()) {
+  // Aggregate users by role
+  const roleMap: Record<string, { count: number; disabled: number }> = {};
+  users.forEach(user => {
+    const roleName = user.role?.name || 'Unknown';
+    if (!roleMap[roleName]) roleMap[roleName] = { count: 0, disabled: 0 };
+    roleMap[roleName].count += 1;
+    if (user.isDisabled) roleMap[roleName].disabled += 1;
+  });
+
+  const getRoleIcon = (roleName: string) => {
+    switch(roleName.toLowerCase()) {
       case 'state': return <UserCog className="text-blue-600" size={24} />;
       case 'district': return <MapPin className="text-green-600" size={24} />;
       case 'deo': return <Layers className="text-purple-600" size={24} />;
@@ -20,66 +42,43 @@ const UserGrid = () => {
       case 'trainer': return <UserCheck className="text-indigo-600" size={24} />;
       case 'headmaster/principal': return <School className="text-orange-600" size={24} />;
       case 'teacher': return <GraduationCap className="text-teal-600" size={24} />;
-      case 'students': return <BookUser className="text-pink-600" size={24} />;
+      case 'student': return <BookUser className="text-pink-600" size={24} />;
       default: return <Users className="text-gray-600" size={24} />;
     }
   };
 
-  const handleRoleClick = (role: string) => {
-    // Convert role to URL-friendly format (lowercase, replace spaces with hyphens)
-    const rolePath = role.toLowerCase().replace(/\s+/g, '-').replace('/', '-');
-    router.push(`/admin/users/${rolePath}`);
-  };
+const handleRoleClick = (roleName: string) => {
+  const rolePath = roleName.toLowerCase().replace(/\s+/g, '-').replace('/', '-');
+  router.push(`/admin/users/${rolePath}`);
+};
+
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {userData.map((user, index) => (
+        {Object.entries(roleMap).map(([roleName, { count, disabled }]) => (
           <div
-            key={index}
-            onClick={() => handleRoleClick(user.role)}
-            className="group cursor-pointer bg-white border border-gray-200 rounded-xl p-6 transition-all hover:border-green-500 hover:shadow-md"
+            key={roleName}
+            onClick={() => handleRoleClick(roleName)}
+            className="group cursor-pointer bg-white border rounded-xl p-6 transition-all hover:border-green-500 hover:shadow-md"
           >
-            <div className="flex items-start justify-between">
-              <div className="flex items-center">
-                <div className="p-3 rounded-lg bg-gray-50 group-hover:bg-green-50 transition mr-4">
-                  {getRoleIcon(user.role)}
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">{user.role}</h3>
-                  <p className="text-sm text-gray-500">{user.description}</p>
-                </div>
+            <div className="flex items-center mb-4">
+              <div className="p-3 rounded-lg bg-gray-50 group-hover:bg-green-50 transition mr-4">
+                {getRoleIcon(roleName)}
               </div>
-              <div className={`text-sm font-medium px-2 py-1 rounded-full ${
-                user.change?.startsWith('+') 
-                  ? 'bg-green-100 text-green-800' 
-                  : user.change === '0' 
-                    ? 'bg-gray-100 text-gray-800' 
-                    : 'bg-red-100 text-red-800'
-              }`}>
-                {user.change}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">{roleName}</h3>
+                <p className="text-sm text-gray-500">
+                  {count} user{count > 1 ? 's' : ''}
+                </p>
               </div>
             </div>
-            
-            <div className="mt-4 flex items-end justify-between">
-              <p className="text-3xl font-bold text-gray-900">{user.count}</p>
-              <span className="text-sm text-gray-500">users</span>
-            </div>
-            
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRoleClick(user.role);
-                }}
-                className="text-sm text-green-700 hover:text-green-800 hover:underline flex items-center"
-              >
-                View details
-                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
+
+            {disabled > 0 && (
+              <span className="inline-block text-sm font-medium px-2 py-1 rounded-full bg-red-100 text-red-800">
+                {disabled} disabled
+              </span>
+            )}
           </div>
         ))}
       </div>

@@ -52,21 +52,25 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await context.params; // ✅ await the params in Next.js 15+
+  const { id } = await params;
+  const userId = Number(id);
 
   try {
-    await prisma.school.delete({
-      where: { id: Number(id) },
+    // First delete all UserSchool relations for the user
+    await prisma.userSchool.deleteMany({
+      where: { userId }
     });
 
-    return NextResponse.json({ message: "School deleted successfully" });
-  } catch (error) {
-    console.error(error);
-    if ((error as any).code === "P2025") {
-      return NextResponse.json({ error: "School not found" }, { status: 404 });
-    }
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    // Then delete the user
+    await prisma.user.delete({
+      where: { id: userId }
+    });
+
+    return NextResponse.json({ message: "User deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });
   }
 }

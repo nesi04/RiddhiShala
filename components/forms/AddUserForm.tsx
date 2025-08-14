@@ -1,60 +1,89 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
+
+interface Role {
+  id: number;
+  name: string;
+}
+
+interface Permission {
+  id: number;
+  name: string;
+}
 
 interface UserFormData {
   name: string;
   email: string;
-  phone: string;
-  role: string;
+  phoneNumber: string;
+  password: string;
+  roleId: number | "";
   district: string;
   state: string;
   status: "active" | "inactive";
   joinDate: string;
-  permissions: string[];
+  permissionIds: number[];
 }
 
 export default function UserModal({
   isOpen,
   onClose,
   onSubmit,
-  role,
+  role, // optional default role name
 }: {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: UserFormData) => void;
-  role?: string; // This will be passed when the modal is under admin/users/[role]
+  role?: string;
 }) {
   const [form, setForm] = useState<UserFormData>({
     name: "",
     email: "",
-    phone: "",
-    role: "",
+    phoneNumber: "",
+    password: "",
+    roleId: "",
     district: "",
     state: "",
     status: "active",
-    joinDate: new Date().toISOString().split('T')[0],
-    permissions: [],
+    joinDate: new Date().toISOString().split("T")[0],
+    permissionIds: [],
   });
 
-  const [selectedPermission, setSelectedPermission] = useState("");
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [permissions, setPermissions] = useState<Permission[]>([]);
+  const [selectedPermission, setSelectedPermission] = useState<number | "">("");
 
-  // Reset form when modal opens or role changes
+  // Fetch roles & permissions when modal is opened
   useEffect(() => {
+    const fetchMeta = async () => {
+      try {
+        const [rolesRes, permsRes] = await Promise.all([
+          fetch("/api/roles"),
+          fetch("/api/permissions"),
+        ]);
+        setRoles(await rolesRes.json());
+        setPermissions(await permsRes.json());
+      } catch (err) {
+        console.error("Failed to load roles/permissions", err);
+      }
+    };
     if (isOpen) {
+      fetchMeta();
       setForm({
         name: "",
         email: "",
-        phone: "",
-        role: role || "",
+        phoneNumber: "",
+        password: "",
+        roleId: "",
         district: "",
         state: "",
         status: "active",
-        joinDate: new Date().toISOString().split('T')[0],
-        permissions: [],
+        joinDate: new Date().toISOString().split("T")[0],
+        permissionIds: [],
       });
     }
-  }, [isOpen, role]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -62,53 +91,36 @@ export default function UserModal({
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: checked,
+      [name]: name === "roleId" ? Number(value) : value,
     }));
   };
 
   const handlePermissionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedPermission(e.target.value);
+    setSelectedPermission(Number(e.target.value));
   };
 
   const addPermission = () => {
-    if (selectedPermission && !form.permissions.includes(selectedPermission)) {
+    if (selectedPermission && !form.permissionIds.includes(selectedPermission as number)) {
       setForm((prev) => ({
         ...prev,
-        permissions: [...prev.permissions, selectedPermission],
+        permissionIds: [...prev.permissionIds, selectedPermission as number],
       }));
       setSelectedPermission("");
     }
   };
 
-  const removePermission = (permission: string) => {
+  const removePermission = (id: number) => {
     setForm((prev) => ({
       ...prev,
-      permissions: prev.permissions.filter((p) => p !== permission),
+      permissionIds: prev.permissionIds.filter((pid) => pid !== id),
     }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(form);
+    onSubmit(form); // Pass the final API-ready form data
     onClose();
   };
-
-  const permissionOptions = [
-    "manage-users",
-    "manage-districts",
-    "manage-schools",
-    "view-reports",
-    "manage-content",
-    "manage-assessments",
-  ];
 
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -120,173 +132,101 @@ export default function UserModal({
           </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Main Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InputField label="Full Name" name="name" value={form.name} onChange={handleChange} required />
+            <InputField label="Email" name="email" type="email" value={form.email} onChange={handleChange} required />
+            <InputField label="Phone Number" name="phoneNumber" value={form.phoneNumber} onChange={handleChange} required />
+            <InputField label="Password" name="password" type="password" value={form.password} onChange={handleChange} required />
+
+            {/* Role Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-              <input
-                name="name"
-                placeholder="Full Name"
-                value={form.name}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
-                required
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <select name="roleId" value={form.roleId} onChange={handleChange} className="w-full border rounded px-3 py-2" required>
+                <option value="">Select Role</option>
+                {roles.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input
-                name="email"
-                placeholder="Email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
-                required
-              />
-            </div>
+            <InputField label="State" name="state" value={form.state} onChange={handleChange} required />
+            <InputField label="District" name="district" value={form.district} onChange={handleChange} required />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-              <input
-                name="phone"
-                placeholder="Phone"
-                type="tel"
-                value={form.phone}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
-                required
-              />
-            </div>
-
-            {!role && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <select
-                  name="role"
-                  value={form.role}
-                  onChange={handleChange}
-                  className="w-full border rounded px-3 py-2"
-                  required
-                >
-                  <option value="">Select Role</option>
-                  <option value="state">State Admin</option>
-                  <option value="district">District Admin</option>
-                  <option value="cluster">Cluster</option>
-                  <option value="block">Block</option>
-                  <option value="trainer">Trainer</option>
-                  <option value="principal">Principal</option>
-                  <option value="teacher">Teacher</option>
-                  <option value="student">Student</option>
-                  <option value="deo">Data Entry Operator</option>
-                </select>
-              </div>
-            )}
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-              <input
-                name="state"
-                placeholder="State"
-                value={form.state}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">District</label>
-              <input
-                name="district"
-                placeholder="District"
-                value={form.district}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
-                required
-              />
-            </div>
-
+            {/* Status */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-              <select
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
-                required
-              >
+              <select name="status" value={form.status} onChange={handleChange} className="w-full border rounded px-3 py-2" required>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Join Date</label>
-              <input
-                name="joinDate"
-                type="date"
-                value={form.joinDate}
-                onChange={handleChange}
-                className="w-full border rounded px-3 py-2"
-                required
-              />
-            </div>
+            <InputField
+              label="Join Date"
+              name="joinDate"
+              type="date"
+              value={form.joinDate}
+              onChange={handleChange}
+              required
+            />
           </div>
 
+          {/* Permissions */}
           <div className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">Permissions</label>
             <div className="flex gap-2">
-              <select
-                value={selectedPermission}
-                onChange={handlePermissionChange}
-                className="flex-1 border rounded px-3 py-2"
-              >
+              <select value={selectedPermission} onChange={handlePermissionChange} className="flex-1 border rounded px-3 py-2">
                 <option value="">Select Permission</option>
-                {permissionOptions.map((permission) => (
-                  <option key={permission} value={permission}>
-                    {permission}
+                {permissions.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
                   </option>
                 ))}
               </select>
-              <button
-                type="button"
-                onClick={addPermission}
-                className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
-              >
+              <button type="button" onClick={addPermission} className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">
                 Add
               </button>
             </div>
-
             <div className="mt-2 flex flex-wrap gap-2">
-              {form.permissions.map((permission) => (
-                <div
-                  key={permission}
-                  className="bg-gray-100 px-3 py-1 rounded-full flex items-center gap-1"
-                >
-                  <span>{permission}</span>
-                  <button
-                    type="button"
-                    onClick={() => removePermission(permission)}
-                    className="text-gray-500 hover:text-black"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
+              {form.permissionIds.map((pid) => {
+                const permName = permissions.find((p) => p.id === pid)?.name || pid;
+                return (
+                  <div key={pid} className="bg-gray-100 px-3 py-1 rounded-full flex items-center gap-1">
+                    <span>{permName}</span>
+                    <button
+                      type="button"
+                      onClick={() => removePermission(pid)}
+                      className="text-gray-500 hover:text-black"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
+          {/* Submit */}
           <div className="flex justify-end pt-4">
-            <button
-              type="submit"
-              className="bg-green-700 text-white px-4 py-2 rounded-md hover:bg-green-800"
-            >
+            <button type="submit" className="bg-green-700 text-white px-4 py-2 rounded-md hover:bg-green-800">
               {role ? `Add ${role}` : "Add User"}
             </button>
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+// ✅ Capitalized to make it a valid React component
+function InputField({ label, ...props }: any) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <input {...props} className="w-full border rounded px-3 py-2" />
     </div>
   );
 }
