@@ -1,351 +1,286 @@
-"use client";
-
+'use client';
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import {
-  User,
-  Mail,
-  Phone,
-  Shield,
-  School,
-  Calendar,
-  BookOpen,
-  MapPin,
-  Users,
-  CheckCircle2,
-  Edit,
-  Save,
-  X,
-  Plus,
-  GraduationCap,
-  Activity
-} from "lucide-react";
-import { fakeUsers as userData } from "@/constants/userData";
+import { User, CheckCircle2, Edit, Save, X, Trash2 } from "lucide-react";
 
 export interface UserDetails {
   id: string;
   name: string;
   email: string;
-  phone: string;
-  assignedSchools: string[];
-  joinDate: string;
-  lastActive: string;
-  status: string;
-  district: string;
-  permissions: string[];
-  address: string;
-  bio: string;
+  phoneNumber: string;
   role: string;
+  status: string;
+  district?: string;
+  permissions: string[];      // permission names only
+  assignedSchools: number[];  // school IDs
 }
 
-const DetailItem = ({ icon, label, value, isEditing, name, formData, onChange }: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  isEditing: boolean;
+interface Permission {
+  id: number;
   name: string;
-  formData: UserDetails | null;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}) => (
-  <div className="flex items-start">
-    <div className="text-gray-500 mr-3 mt-0.5">{icon}</div>
-    <div className="flex-1">
-      <p className="text-sm text-gray-500">{label}</p>
-      {isEditing ? (
-        <input
-          type="text"
-          name={name}
-          value={formData?.[name as keyof UserDetails] || ""}
-          onChange={onChange}
-          className="w-full border rounded p-1 text-sm mt-1"
-        />
-      ) : (
-        <p className="text-sm font-medium">{value}</p>
-      )}
-    </div>
-  </div>
-);
+}
 
-const DistrictOfficerDetails = ({ data, isEditing, onChange }: {
-  data: UserDetails;
-  isEditing: boolean;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}) => (
-  <div className="space-y-4">
-    <DetailItem
-      icon={<School size={16} />}
-      label="Assigned Schools"
-      value={data.assignedSchools.join(", ")}
-      isEditing={isEditing}
-      name="assignedSchools"
-      formData={data}
-      onChange={onChange}
-    />
-    <DetailItem
-      icon={<MapPin size={16} />}
-      label="District"
-      value={data.district}
-      isEditing={isEditing}
-      name="district"
-      formData={data}
-      onChange={onChange}
-    />
-  </div>
-);
+interface School {
+  id: number;
+  name: string;
+}
 
-const SchoolPrincipalDetails = ({ data, isEditing, onChange }: {
-  data: UserDetails;
-  isEditing: boolean;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}) => (
-  <div className="space-y-4">
-    <DetailItem
-      icon={<School size={16} />}
-      label="School"
-      value={data.assignedSchools[0] || "Not assigned"}
-      isEditing={isEditing}
-      name="assignedSchools"
-      formData={data}
-      onChange={onChange}
-    />
-    <DetailItem
-      icon={<GraduationCap size={16} />}
-      label="Staff Count"
-      value="24"
-      isEditing={false}
-      name=""
-      formData={null}
-      onChange={() => {}}
-    />
-  </div>
-);
+interface Role {
+  id: number;
+  name: string;
+}
 
 export default function UserRolePage() {
   const router = useRouter();
   const params = useParams();
-  const roleParam = Array.isArray(params.role) ? params.role[0] : params.role;
+  const userId = Array.isArray(params.id) ? params.id[0] : params.id;
 
-  const [isEditing, setIsEditing] = useState(false);
   const [user, setUser] = useState<UserDetails | null>(null);
   const [formData, setFormData] = useState<UserDetails | null>(null);
+  const [allPermissions, setAllPermissions] = useState<Permission[]>([]);
+  const [allSchools, setAllSchools] = useState<School[]>([]);
+  const [allRoles, setAllRoles] = useState<Role[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  // Only allow certain keys for scalar fields
+  type ScalarFields = "name" | "email" | "phoneNumber" | "district" | "role" | "status";
+  const getFieldValue = (field: ScalarFields) =>
+    (formData?.[field] as string) ?? "";
+
+  // Fetch user details
   useEffect(() => {
-    if (!roleParam) return;
+    if (!userId) return;
+    const fetchUser = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/users/${userId}`);
+        if (!res.ok) throw new Error("Failed to fetch user");
+        const data = await res.json();
+        setUser(data);
+        setFormData(data);
+      } catch (err) {
+        console.error(err);
+        router.push("/admin/users");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, [userId, router]);
 
-    const matchedUser = userData.find(u =>
-      u.role.toLowerCase().replace(/\s+/g, "-").replace("/", "-") === roleParam.toLowerCase()
-    );
+  // Fetch dropdown/filter data
+  useEffect(() => {
+    const fetchMeta = async () => {
+      try {
+        const [rolesRes, permRes, schoolRes] = await Promise.all([
+          fetch("/api/roles"),
+          fetch("/api/permissions"),
+          fetch("/api/schools"),
+        ]);
+        setAllRoles(await rolesRes.json());
+        setAllPermissions(await permRes.json());
+        setAllSchools(await schoolRes.json());
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchMeta();
+  }, []);
 
-    if (matchedUser) {
-      const userDetails: UserDetails = {
-        ...matchedUser,
-        id: matchedUser.id,
-        name: matchedUser.name,
-        email: matchedUser.email,
-        phone: matchedUser.phone,
-        assignedSchools: matchedUser.assignedSchools || ["GreenTown High"],
-        joinDate: matchedUser.joinDate || "2023-01-15",
-        lastActive: matchedUser.lastActive || "2023-06-20",
-        status: matchedUser.status,
-        district: matchedUser.district,
-        permissions: matchedUser.permissions || ["view_reports"],
-        address: matchedUser.address || "123 Education Lane",
-        bio: matchedUser.bio || `${matchedUser.role} with years of experience`,
-        role: matchedUser.role
-      };
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const target = e.target as HTMLInputElement | HTMLSelectElement;
+    const { name, value } = target;
 
-      setUser(userDetails);
-      setFormData(userDetails);
+    if (target instanceof HTMLInputElement && target.type === "checkbox") {
+      const checked = target.checked;
+      setFormData(prev => {
+        if (!prev) return prev;
+        if (name === "permissions") {
+          return {
+            ...prev,
+            permissions: checked
+              ? [...prev.permissions, value]
+              : prev.permissions.filter(p => p !== value)
+          };
+        }
+        if (name === "assignedSchools") {
+          const schoolId = Number(value);
+          return {
+            ...prev,
+            assignedSchools: checked
+              ? [...prev.assignedSchools, schoolId]
+              : prev.assignedSchools.filter(id => id !== schoolId)
+          };
+        }
+        return prev;
+      });
     } else {
-      router.push("/admin/users");
+      setFormData(prev => (prev ? { ...prev, [name]: value } : prev));
     }
-  }, [roleParam, router]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...(prev as UserDetails),
-      [name]: value
-    }));
   };
 
-  const handleSave = () => {
-    setUser(formData);
-    setIsEditing(false);
+  const handleSave = async () => {
+    if (!formData) return;
+    try {
+      const res = await fetch(`/api/users/${userId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) throw new Error("Failed to save");
+      const updatedUser = await res.json();
+      setUser(updatedUser);
+      setIsEditing(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleCancel = () => {
-    setFormData(user);
-    setIsEditing(false);
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+    try {
+      const res = await fetch(`/api/users/${userId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete user");
+      router.push("/admin/users");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete user");
+    }
   };
 
-  if (!user) return <div className="p-6">Loading user data...</div>;
-
-  
-
-
+  if (loading) return <div className="p-6">Loading user...</div>;
+  if (!user) return <div className="p-6 text-red-600">User not found</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200 py-4 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center text-sm text-gray-600 mb-2">
-            <button
-              onClick={() => router.push("/admin/users")}
-              className="hover:text-green-700 flex items-center"
-            >
-              <Users className="h-4 w-4 mr-1" />
-              Users
-            </button>
-            <span className="mx-1">/</span>
-            <span className="text-green-700">{user.name}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-800 flex items-center">
-              <User className="text-green-600 mr-2" size={24} />
-              User Management
-            </h1>
-            <div className="flex space-x-3">
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={handleSave}
-                    className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center"
-                  >
-                    <Save className="mr-2" size={16} />
-                    Save Changes
-                  </button>
-                  <button
-                    onClick={handleCancel}
-                    className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition flex items-center"
-                  >
-                    <X className="mr-2" size={16} />
-                    Cancel
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-md text-sm font-medium transition flex items-center"
-                >
-                  <Edit className="mr-2" size={16} />
-                  Edit Profile
-                </button>
-              )}
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50 p-6">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800 flex items-center">
+          <User className="text-green-600 mr-2" size={24} /> {user.name}
+        </h1>
+        <div className="flex space-x-3">
+          {isEditing ? (
+            <>
+              <button onClick={handleSave} className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-md text-sm flex items-center">
+                <Save className="mr-2" size={16} /> Save Changes
+              </button>
+              <button onClick={() => { setFormData(user); setIsEditing(false); }} className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm flex items-center">
+                <X className="mr-2" size={16} /> Cancel
+              </button>
+              <button onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm flex items-center">
+                <Trash2 className="mr-2" size={16} /> Delete
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={() => setIsEditing(true)} className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-md text-sm flex items-center">
+                <Edit className="mr-2" size={16} /> Edit User
+              </button>
+              <button onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm flex items-center">
+                <Trash2 className="mr-2" size={16} /> Delete
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto py-6 px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="p-6">
-                <div className="flex flex-col items-center">
-                  <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center text-3xl font-bold text-gray-600 mb-4">
-                    {user.name.charAt(0)}
-                  </div>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData?.name || ""}
-                      onChange={handleInputChange}
-                      className="text-xl font-bold text-center mb-1 border rounded p-1 w-full"
-                    />
-                  ) : (
-                    <h2 className="text-xl font-bold text-center mb-1">{user.name}</h2>
-                  )}
-                  <div className="flex items-center mb-4">
-                    <Shield className="text-green-600 mr-1" size={16} />
-                    {isEditing ? (
-                      <select
-                        name="role"
-                        value={formData?.role || ""}
-                        onChange={(e) => handleInputChange(e as any)}
-                        className="border rounded p-1 text-sm"
-                      >
-                        {userData.map((userType) => (
-                          <option key={userType.role} value={userType.role}>
-                            {userType.role}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <span className="text-sm text-gray-600">{user.role}</span>
-                    )}
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {user.status}
-                  </span>
-                </div>
-
-                <div className="mt-6 space-y-4">
-                  <DetailItem icon={<Mail size={16} />} label="Email" value={user.email} isEditing={isEditing} name="email" formData={formData} onChange={handleInputChange} />
-                  <DetailItem icon={<Phone size={16} />} label="Phone" value={user.phone} isEditing={isEditing} name="phone" formData={formData} onChange={handleInputChange} />
-                  <DetailItem icon={<MapPin size={16} />} label="District" value={user.district} isEditing={isEditing} name="district" formData={formData} onChange={handleInputChange} />
-                  <DetailItem icon={<Calendar size={16} />} label="Join Date" value={user.joinDate} isEditing={isEditing} name="joinDate" formData={formData} onChange={handleInputChange} />
-                </div>
-              </div>
-            </div>
+      {/* User Info */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6 p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {(["name", "email", "phoneNumber", "district"] as ScalarFields[]).map(field => (
+          <div key={field}>
+            <label className="block text-sm font-medium text-gray-700 capitalize">{field}</label>
+            <input
+              type={field === "email" ? "email" : field === "phoneNumber" ? "tel" : "text"}
+              name={field}
+              value={String(getFieldValue(field))}
+              disabled={!isEditing}
+              onChange={handleInputChange}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+            />
           </div>
+        ))}
 
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h3 className="text-lg font-medium text-gray-800 flex items-center">
-                  <Shield className="text-green-600 mr-2" size={18} />
-                  Role Information
-                </h3>
-              </div>
-              <div className="p-6">
-                {user.role === 'District' && <DistrictOfficerDetails data={user} isEditing={isEditing} onChange={handleInputChange} />}
-                {user.role === 'Head of School' && <SchoolPrincipalDetails data={user} isEditing={isEditing} onChange={handleInputChange} />}
-              </div>
-            </div>
+        {/* Role Dropdown */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Role</label>
+          <select
+            name="role"
+            value={formData?.role || ""}
+            disabled={!isEditing}
+            onChange={handleInputChange}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+          >
+            <option value="">Select role</option>
+            {allRoles.map(r => (
+              <option key={r.id} value={r.name}>{r.name}</option>
+            ))}
+          </select>
+        </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h3 className="text-lg font-medium text-gray-800 flex items-center">
-                  <CheckCircle2 className="text-green-600 mr-2" size={18} />
-                  Permissions
-                </h3>
-              </div>
-              <div className="p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {user.permissions?.map((permission: string) => (
-                    <div key={permission} className="flex items-center">
-                      <input type="checkbox" checked readOnly className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" />
-                      <label className="ml-2 block text-sm text-gray-700 capitalize">
-                        {permission.replace("_", " ")}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                {isEditing && (
-                  <button className="mt-4 text-sm text-green-700 hover:text-green-800 flex items-center">
-                    <Plus className="mr-1" size={14} />
-                    Add Permission
-                  </button>
-                )}
-              </div>
-            </div>
+        {/* Status Dropdown */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Status</label>
+          <select
+            name="status"
+            value={formData?.status || "Active"}
+            disabled={!isEditing}
+            onChange={handleInputChange}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+          >
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                <h3 className="text-lg font-medium text-gray-800 flex items-center">
-                  <Activity className="text-green-600 mr-2" size={18} />
-                  Recent Activity
-                </h3>
-              </div>
-              <div className="p-6 space-y-4">
-                <DetailItem icon={<BookOpen size={16} />} label="Viewed school reports" value="2023-06-20 14:30" isEditing={false} name="" formData={null} onChange={() => {}} />
-                <DetailItem icon={<School size={16} />} label="Updated student records" value="2023-06-18 10:15" isEditing={false} name="" formData={null} onChange={() => {}} />
-                <DetailItem icon={<User size={16} />} label="Logged in to system" value="2023-06-15 09:00" isEditing={false} name="" formData={null} onChange={() => {}} />
-              </div>
-            </div>
-          </div>
+      {/* Permissions */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h3 className="text-lg font-medium text-gray-800 flex items-center">
+            <CheckCircle2 className="text-green-600 mr-2" size={18} /> Permissions
+          </h3>
+        </div>
+        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {allPermissions.map((permission) => (
+            <label key={permission.id} className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="permissions"
+                value={permission.name}
+                checked={formData?.permissions?.includes(permission.name) ?? false}
+                disabled={!isEditing}
+                onChange={handleInputChange}
+                className="h-4 w-4 text-green-600 border-gray-300 rounded"
+              />
+              <span className="text-sm text-gray-700 capitalize">{permission.name.replace("-", " ")}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Assigned Schools */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h3 className="text-lg font-medium text-gray-800 flex items-center">
+            <CheckCircle2 className="text-green-600 mr-2" size={18} /> Assigned Schools
+          </h3>
+        </div>
+        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {allSchools.map((school) => (
+            <label key={school.id} className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                name="assignedSchools"
+                value={String(school.id)} // HTML wants string
+                checked={formData?.assignedSchools?.includes(school.id) ?? false}
+                disabled={!isEditing}
+                onChange={handleInputChange}
+                className="h-4 w-4 text-green-600 border-gray-300 rounded"
+              />
+              <span className="text-sm text-gray-700">{school.name}</span>
+            </label>
+          ))}
         </div>
       </div>
     </div>
