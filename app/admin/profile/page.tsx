@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Settings, Activity, Users } from "lucide-react";
-import { useRouter } from "next/navigation"; // ✅ Correct import for App Router
+import { useRouter } from "next/navigation"; 
 
 export default function AdminDashboard() {
   const user = {

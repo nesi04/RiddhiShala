@@ -4,7 +4,7 @@ import { useEffect, useState, ChangeEvent } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 
 import { jsPDF } from 'jspdf';
-import { Document, Packer, Paragraph, TextRun } from 'docx';
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } from 'docx';
 import { saveAs } from 'file-saver';
 
 interface School {
@@ -28,7 +28,6 @@ interface School {
   campusSize?: string;
 }
 
-
 export default function SchoolDetailsPage() {
   const params = useParams();
   const router = useRouter();
@@ -46,7 +45,7 @@ export default function SchoolDetailsPage() {
       if (res.ok) {
         const data: School = await res.json();
         setSchool(data);
-        setFormData(data); // initialize form with fetched data
+        setFormData(data);
       } else {
         setSchool(null);
       }
@@ -100,7 +99,7 @@ export default function SchoolDetailsPage() {
       });
       if (res.ok) {
         alert('School deleted successfully');
-        router.push('/admin/schools'); // redirect back to list
+        router.push('/admin/schools');
       } else {
         alert('Failed to delete school');
       }
@@ -109,182 +108,193 @@ export default function SchoolDetailsPage() {
       alert('Error deleting school');
     }
   }
-function generatePDF() {
-  if (!school) return;
-  const doc = new jsPDF();
 
-  // Title
-  doc.setFontSize(20);
-  doc.text('School Report', 14, 20);
-  doc.setFontSize(12);
-  doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 28);
+  // Fields
+  const fields: { label: string; name: keyof School; type?: string }[] = [
+    { label: 'Name', name: 'name', type: 'text' },
+    { label: 'Year Of Establishment', name: 'yearOfEstablishment', type: 'number' },
+    { label: 'Upgraded To', name: 'upgradedTo', type: 'text' },
+    { label: 'UDISE Code', name: 'udiseCode', type: 'text' },
+    { label: 'District', name: 'district', type: 'text' },
+    { label: 'Block', name: 'block', type: 'text' },
+    { label: 'Cluster', name: 'cluster', type: 'text' },
+    { label: 'Village/Town', name: 'villageTown', type: 'text' },
+    { label: 'Management', name: 'management', type: 'text' },
+    { label: 'School Type', name: 'schoolType', type: 'text' },
+    { label: 'Medium Of Instruction', name: 'mediumOfInstruction', type: 'text' },
+    { label: 'Inclusive School', name: 'inclusiveSchool', type: 'checkbox' },
+    { label: 'Vocational Trades', name: 'vocationalTrades', type: 'text' },
+    { label: 'Co-Education', name: 'coEducation', type: 'checkbox' },
+    { label: 'Total Area', name: 'totalArea', type: 'text' },
+    { label: 'Campus Type', name: 'campusType', type: 'text' },
+    { label: 'Campus Size', name: 'campusSize', type: 'text' },
+  ];
 
-  // Table-like display
-  let y = 40;
-  fields.forEach(({ label, name }) => {
-    const value = school[name as keyof typeof school];
-    const displayVal = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value ?? 'Not specified');
+  function generatePDF() {
+    if (!school) return;
+    const doc = new jsPDF();
 
+    doc.setFontSize(18);
+    doc.text('School Report', 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 22);
+
+    // Table header
+    let y = 30;
     doc.setFont("helvetica", "bold");
-    doc.text(`${label}:`, 14, y);
+    doc.text("Field", 14, y);
+    doc.text("Value", 80, y);
+    y += 6;
+
     doc.setFont("helvetica", "normal");
-    doc.text(displayVal, 60, y);
+    fields.forEach(({ label, name }) => {
+      const value = school[name];
+      const displayVal = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value ?? 'Not specified');
 
-    y += 8;
-    if (y > 280) {
-      doc.addPage();
-      y = 20;
-    }
-  });
+      doc.text(label, 14, y);
+      doc.text(displayVal, 80, y);
 
-  doc.save(`school-report-${school.id}.pdf`);
-}
-
-
-
-async function generateWord() {
-  if (!school) return;
-
-  const paragraphs = fields.map(({ label, name }) => {
-    const value = school[name as keyof typeof school];
-    const displayVal = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value ?? 'Not specified');
-
-    return new Paragraph({
-      children: [
-        new TextRun({ text: `${label}: `, bold: true }),
-        new TextRun(displayVal),
-      ],
-      spacing: { after: 200 },
+      y += 6;
+      if (y > 280) {
+        doc.addPage();
+        y = 20;
+      }
     });
-  });
 
-  const doc = new Document({
-    sections: [
-      {
-        properties: {},
+    doc.save(`school-report-${school.id}.pdf`);
+  }
+
+  async function generateWord() {
+    if (!school) return;
+
+    const tableRows: TableRow[] = [
+      new TableRow({
         children: [
-          new Paragraph({
-            text: "School Report",
-            heading: "Heading1",
-            spacing: { after: 300 },
+          new TableCell({
+            width: { size: 50, type: WidthType.PERCENTAGE },
+            children: [new Paragraph({ children: [new TextRun({ text: "Field", bold: true })] })],
           }),
-          new Paragraph({
-            text: `Generated on: ${new Date().toLocaleDateString()}`,
-            spacing: { after: 300 },
+          new TableCell({
+            width: { size: 50, type: WidthType.PERCENTAGE },
+            children: [new Paragraph({ children: [new TextRun({ text: "Value", bold: true })] })],
           }),
-          ...paragraphs,
         ],
-      },
-    ],
-  });
+      }),
+      ...fields.map(({ label, name }) => {
+        const value = school[name];
+        const displayVal = typeof value === "boolean" ? (value ? "Yes" : "No") : String(value ?? "Not specified");
 
-  const blob = await Packer.toBlob(doc);
-  saveAs(blob, `school-report-${school.id}.docx`);
-}
+        return new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph(label)] }),
+            new TableCell({ children: [new Paragraph(displayVal)] }),
+          ],
+        });
+      }),
+    ];
 
+    const doc = new Document({
+      sections: [
+        {
+          children: [
+            new Paragraph({ children: [new TextRun({ text: "School Report", bold: true, size: 28 })] }),
+            new Paragraph({ children: [new TextRun(`Generated on: ${new Date().toLocaleDateString()}`)] }),
+            new Table({ rows: tableRows }),
+          ],
+        },
+      ],
+    });
 
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, `school-report-${school.id}.docx`);
+  }
 
   if (loading) return <p>Loading...</p>;
   if (!school) return <p>School not found</p>;
 
-  // Fields to display and edit
-const fields: { label: string; name: keyof School; type?: string }[] = [
-  { label: 'Name', name: 'name', type: 'text' },
-  { label: 'Year Of Establishment', name: 'yearOfEstablishment', type: 'number' },
-  { label: 'Upgraded To', name: 'upgradedTo', type: 'text' },
-  { label: 'UDISE Code', name: 'udiseCode', type: 'text' },
-  { label: 'District', name: 'district', type: 'text' },
-  { label: 'Block', name: 'block', type: 'text' },
-  { label: 'Cluster', name: 'cluster', type: 'text' },
-  { label: 'Village/Town', name: 'villageTown', type: 'text' },
-  { label: 'Management', name: 'management', type: 'text' },
-  { label: 'School Type', name: 'schoolType', type: 'text' },
-  { label: 'Medium Of Instruction', name: 'mediumOfInstruction', type: 'text' },
-  { label: 'Inclusive School', name: 'inclusiveSchool', type: 'checkbox' },
-  { label: 'Vocational Trades', name: 'vocationalTrades', type: 'text' },
-  { label: 'Co-Education', name: 'coEducation', type: 'checkbox' },
-  { label: 'Total Area', name: 'totalArea', type: 'text' },
-  { label: 'Campus Type', name: 'campusType', type: 'text' },
-  { label: 'Campus Size', name: 'campusSize', type: 'text' },
-];
+  return (
+    <div className="max-w-5xl mx-auto p-8 bg-gray-50 shadow-lg rounded-lg border border-gray-200">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">School Details</h1>
 
-return (
-  <div className="max-w-5xl mx-auto p-8 bg-gray-50 shadow-lg rounded-lg border border-gray-200">
-    <h1 className="text-3xl font-bold mb-6 text-gray-800">School Details</h1>
-
-    {/* Action Buttons */}
-    <div className="flex flex-wrap gap-3 mb-6">
-      <button
-        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-        onClick={() => setEditMode(!editMode)}
-      >
-        ✏️ {editMode ? 'Cancel Edit' : 'Edit School'}
-      </button>
-      <button
-        className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition"
-        onClick={generatePDF}
-      >
-        📄 Download PDF
-      </button>
-      <button
-        className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition"
-        onClick={generateWord}
-      >
-        📝 Download Word
-      </button>
-    </div>
-
-    {/* Form / Display Fields */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {fields.map(({ label, name, type = 'text' }) => (
-        <div key={name as string} className="bg-white p-4 rounded shadow-sm border border-gray-200">
-          <label className="block font-semibold mb-1 text-gray-700">{label}:</label>
-          {editMode ? (
-            type === 'checkbox' ? (
-              <input
-                type="checkbox"
-                name={name as string}
-                checked={Boolean(formData[name])}
-                onChange={handleChange}
-                className="h-5 w-5"
-              />
-            ) : (
-              <input
-                type={type}
-                name={name as string}
-                value={
-                  formData[name] !== undefined && formData[name] !== null
-                    ? String(formData[name])
-                    : ''
-                }
-                onChange={handleChange}
-                className="border rounded px-3 py-2 w-full focus:ring-2 focus:ring-blue-400"
-              />
-            )
-          ) : (
-            <p className="text-gray-800">{String(school[name] ?? 'Not specified')}</p>
-          )}
-        </div>
-      ))}
-    </div>
-
-    {/* Save / Delete */}
-    {editMode && (
-      <div className="flex gap-4 mt-8">
+      {/* Action Buttons */}
+      <div className="flex flex-wrap gap-3 mb-6">
         <button
-          onClick={handleSave}
-          className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          onClick={() => setEditMode(!editMode)}
         >
-          💾 Save
+          ✏️ {editMode ? 'Cancel Edit' : 'Edit School'}
         </button>
         <button
-          onClick={handleDelete}
-          className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+          className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition"
+          onClick={generatePDF}
         >
-          🗑️ Delete
+          📄 Download PDF
+        </button>
+        <button
+          className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition"
+          onClick={generateWord}
+        >
+          📝 Download Word
         </button>
       </div>
-    )}
-  </div>
-);
+
+      {/* Table UI */}
+      <table className="w-full border border-gray-300 text-sm">
+        <thead className="bg-blue-100">
+          <tr>
+            <th className="border border-gray-300 p-2 text-left w-1/3">Field</th>
+            <th className="border border-gray-300 p-2 text-left">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {fields.map(({ label, name, type = 'text' }) => (
+            <tr key={name as string}>
+              <td className="border border-gray-300 p-2 font-medium">{label}</td>
+              <td className="border border-gray-300 p-2">
+                {editMode ? (
+                  type === 'checkbox' ? (
+                    <input
+                      type="checkbox"
+                      name={name as string}
+                      checked={Boolean(formData[name])}
+                      onChange={handleChange}
+                      className="h-4 w-4"
+                    />
+                  ) : (
+                    <input
+                      type={type}
+                      name={name as string}
+                      value={formData[name] !== undefined && formData[name] !== null ? String(formData[name]) : ''}
+                      onChange={handleChange}
+                      className="border rounded px-2 py-1 w-full focus:ring-2 focus:ring-blue-400"
+                    />
+                  )
+                ) : (
+                  <span>{String(school[name] ?? 'Not specified')}</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Save / Delete */}
+      {editMode && (
+        <div className="flex gap-4 mt-8">
+          <button
+            onClick={handleSave}
+            className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+          >
+            💾 Save
+          </button>
+          <button
+            onClick={handleDelete}
+            className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+          >
+            🗑️ Delete
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
