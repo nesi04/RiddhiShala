@@ -74,10 +74,7 @@ const UserManagementPage = () => {
                 <Plus className="mr-2" size={16} />
                 Add User
               </button>
-              <button className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition flex items-center">
-                <Download className="mr-2" size={16} />
-                Export
-              </button>
+              
             </div>
           </div>
         </div>

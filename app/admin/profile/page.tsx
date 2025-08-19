@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
   const user = {
-    name: "John Doe",
+    name: "Riddhishala",
     role: "Administrator",
     profilePic: "", // Leave empty to test letter avatar
   };
@@ -87,13 +87,13 @@ export default function AdminDashboard() {
           </button>
           <button
             onClick={handleActivityLogsClick}
-            className="flex items-center justify-center bg-blue-600 text-white py-3 rounded-lg shadow hover:bg-blue-700 transition"
+            className="flex items-center justify-center border-2 bg-white border-green-500 text-green-700 py-3 rounded-lg shadow hover:bg-white transition"
           >
             <Activity className="mr-2" size={18} /> Activity Logs
           </button>
           <button
             onClick={handleManageUsersClick}
-            className="flex items-center justify-center bg-purple-600 text-white py-3 rounded-lg shadow hover:bg-purple-700 transition"
+            className="flex items-center justify-center  bg-green-600 text-white py-3 rounded-lg shadow hover:bg-green-700 transition"
           >
             <Users className="mr-2" size={18} /> Manage Users
           </button>

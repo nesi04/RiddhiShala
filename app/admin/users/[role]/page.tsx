@@ -66,15 +66,7 @@ const RoleUsersPage = () => {
       <h1 className="text-2xl font-bold capitalize mb-6">{roleParam.replace(/-/g, ' ')} Users</h1>
 
       <div className="flex space-x-3 mb-4">
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-md text-sm flex items-center"
-        >
-          <Plus className="mr-2" size={16} /> Add User
-        </button>
-        <button className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm flex items-center">
-          <Download className="mr-2" size={16} /> Export
-        </button>
+      
       </div>
 
       {/* Users Table */}
@@ -86,7 +78,7 @@ const RoleUsersPage = () => {
               <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
               <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
               <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">District</th>
+              
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -119,7 +111,6 @@ const RoleUsersPage = () => {
                     {user.status}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">{user.district}</td>
               </tr>
             ))}
           </tbody>

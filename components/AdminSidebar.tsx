@@ -87,7 +87,7 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
 
         <div className="mt-8 pt-4 border-t border-gray-100">
           <ul className="space-y-2">
-            <SidebarLink href="/admin/settings" label="System Settings" icon={<Settings size={20} />} isActive={pathname.startsWith('/admin/settings')} />
+            {/* <SidebarLink href="/admin/settings" label="System Settings" icon={<Settings size={20} />} isActive={pathname.startsWith('/admin/settings')} /> */}
             <SidebarLink href="/admin/profile" label="My Profile" icon={<User size={20} />} isActive={pathname.startsWith('/admin/profile')} />
           </ul>
         </div>
