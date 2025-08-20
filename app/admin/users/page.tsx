@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Home, Users, Plus, Download, ChevronDown } from "lucide-react";
 import UserGrid from "@/components/UserGrid";
-import withAuth from "@/components/withAuth";
+
 import UserModal from "@/components/forms/AddUserForm";
 
 const UserManagementPage = () => {
