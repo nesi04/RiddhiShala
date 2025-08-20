@@ -35,25 +35,32 @@ export async function POST(req: Request) {
       );
     }
 
+    // Normalize vocationalTrades to string array
+    const tradesArray = Array.isArray(vocationalTrades)
+      ? vocationalTrades
+      : vocationalTrades
+      ? vocationalTrades.split(",").map((s: string) => s.trim()).filter(Boolean)
+      : [];
+
     const newSchool = await prisma.school.create({
       data: {
         name,
-        yearOfEstablishment,
-        upgradedTo,
+        established: yearOfEstablishment,            // Map API to schema
+        upgradedYear: upgradedTo,
         udiseCode,
         district,
         block,
         cluster,
-        villageTown,
+        village: villageTown,
         management,
-        schoolType,
-        mediumOfInstruction,
-        inclusiveSchool,
-        vocationalTrades,
-        coEducation,
+        type: schoolType,
+        medium: mediumOfInstruction,
+        inclusive: Boolean(inclusiveSchool),
+        vocationalTrades: tradesArray,
+        coed: coEducation === undefined ? false : Boolean(coEducation),
         totalArea,
-        campusType,
-        campusSize,
+        
+        
       },
     });
 

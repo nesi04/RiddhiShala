@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, ChangeEvent } from "react";
 import { X } from "lucide-react";
 
 interface SchoolFormData {
@@ -57,7 +57,7 @@ export default function SchoolModal({
   if (!isOpen) return null;
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
     let newValue: string | number | boolean | undefined = value;
@@ -95,7 +95,8 @@ export default function SchoolModal({
       });
 
       if (!res.ok) {
-        throw new Error("Failed to create school");
+        const errData = await res.json();
+        throw new Error(errData.error || "Failed to create school");
       }
 
       setMessage("School created successfully!");
@@ -131,38 +132,83 @@ export default function SchoolModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center">
-      <div className="bg-white rounded-2xl shadow-2xl shadow-green-500 p-6 w-full max-w-2xl">
-        <div className="flex justify-between items-center mb-4">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center px-4 sm:px-0">
+      <div className="bg-white rounded-2xl shadow-2xl shadow-green-500 p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">Add New School</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-black">
-            <X />
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-black transition"
+            aria-label="Close modal"
+          >
+            <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* STEP 1 */}
           {step === 1 && (
             <>
-              <label>
-                School Name *
-                <input name="name" value={form.name} onChange={handleChange} className="w-full border rounded px-3 py-2" required />
+              <label className="block space-y-1">
+                <span className="font-semibold">School Name <span className="text-red-600">*</span></span>
+                <input
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                  placeholder="School Name"
+                />
               </label>
-              <label>
-                UDISE Code
-                <input name="udiseCode" value={form.udiseCode || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+
+              <label className="block space-y-1">
+                <span className="font-semibold flex items-center">
+                  UDISE Code{" "}
+                  <span className="ml-1 px-2 py-0.5 text-xs bg-yellow-300 rounded font-medium text-yellow-900">
+                    Important & Unique
+                  </span>
+                </span>
+                <input
+                  name="udiseCode"
+                  value={form.udiseCode || ""}
+                  onChange={handleChange}
+                  className="w-full border border-yellow-400 rounded px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  placeholder="UDISE Code"
+                  required
+                />
               </label>
-              <label>
-                District
-                <input name="district" value={form.district || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+
+              <label className="block">
+                <span className="font-semibold">District</span>
+                <input
+                  name="district"
+                  value={form.district || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="District"
+                />
               </label>
-              <label>
-                Block
-                <input name="block" value={form.block || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+
+              <label className="block">
+                <span className="font-semibold">Block</span>
+                <input
+                  name="block"
+                  value={form.block || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Block"
+                />
               </label>
-              <label>
-                Cluster
-                <input name="cluster" value={form.cluster || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+
+              <label className="block">
+                <span className="font-semibold">Cluster</span>
+                <input
+                  name="cluster"
+                  value={form.cluster || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Cluster"
+                />
               </label>
             </>
           )}
@@ -170,28 +216,67 @@ export default function SchoolModal({
           {/* STEP 2 */}
           {step === 2 && (
             <>
-              <label>
-                Village/Town
-                <input name="villageTown" value={form.villageTown || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+              <label className="block space-y-1">
+                <span className="font-semibold">Village/Town</span>
+                <input
+                  name="villageTown"
+                  value={form.villageTown || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Village or Town"
+                />
               </label>
-              <label>
-                Management
-                <input name="management" value={form.management || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+
+              <label className="block space-y-1">
+                <span className="font-semibold">Management</span>
+                <input
+                  name="management"
+                  value={form.management || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Management"
+                />
               </label>
-              <label>
-                School Type
-                <input name="schoolType" value={form.schoolType || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+
+              <label className="block space-y-1">
+                <span className="font-semibold">School Type</span>
+                <input
+                  name="schoolType"
+                  value={form.schoolType || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="School Type"
+                />
               </label>
-              <label>
-                Medium of Instruction
-                <input name="mediumOfInstruction" value={form.mediumOfInstruction || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+
+              <label className="block space-y-1">
+                <span className="font-semibold">Medium of Instruction</span>
+                <input
+                  name="mediumOfInstruction"
+                  value={form.mediumOfInstruction || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Medium of Instruction"
+                />
               </label>
+
               <label className="flex items-center space-x-2">
-                <input type="checkbox" name="inclusiveSchool" checked={form.inclusiveSchool} onChange={handleChange} />
+                <input
+                  type="checkbox"
+                  name="inclusiveSchool"
+                  checked={form.inclusiveSchool}
+                  onChange={handleChange}
+                />
                 <span>Inclusive School</span>
               </label>
+
               <label className="flex items-center space-x-2">
-                <input type="checkbox" name="coEducation" checked={form.coEducation || false} onChange={handleChange} />
+                <input
+                  type="checkbox"
+                  name="coEducation"
+                  checked={form.coEducation || false}
+                  onChange={handleChange}
+                />
                 <span>Co-education</span>
               </label>
             </>
@@ -200,54 +285,111 @@ export default function SchoolModal({
           {/* STEP 3 */}
           {step === 3 && (
             <>
-              <label>
-                Vocational Trades
-                <input name="vocationalTrades" value={form.vocationalTrades || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+              <label className="block space-y-1">
+                <span className="font-semibold">Vocational Trades</span>
+                <input
+                  name="vocationalTrades"
+                  value={form.vocationalTrades || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Vocational Trades"
+                />
               </label>
-              <label>
-                Total Area (sq.m)
-                <input name="totalArea" value={form.totalArea || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+
+              <label className="block space-y-1">
+                <span className="font-semibold">Total Area (sq.m)</span>
+                <input
+                  name="totalArea"
+                  value={form.totalArea || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Total Area"
+                />
               </label>
-              <label>
-                Campus Type
-                <input name="campusType" value={form.campusType || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+
+              <label className="block space-y-1">
+                <span className="font-semibold">Campus Type</span>
+                <input
+                  name="campusType"
+                  value={form.campusType || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Campus Type"
+                />
               </label>
-              <label>
-                Campus Size (acres)
-                <input name="campusSize" value={form.campusSize || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+
+              <label className="block space-y-1">
+                <span className="font-semibold">Campus Size (acres)</span>
+                <input
+                  name="campusSize"
+                  value={form.campusSize || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Campus Size"
+                />
               </label>
-              <label>
-                Year of Establishment
-                <input type="number" name="yearOfEstablishment" value={form.yearOfEstablishment || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+
+              <label className="block space-y-1">
+                <span className="font-semibold">Year of Establishment</span>
+                <input
+                  type="number"
+                  name="yearOfEstablishment"
+                  value={form.yearOfEstablishment || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Year of Establishment"
+                />
               </label>
-              <label>
-                Upgraded To
-                <input name="upgradedTo" value={form.upgradedTo || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+
+              <label className="block space-y-1">
+                <span className="font-semibold">Upgraded To</span>
+                <input
+                  name="upgradedTo"
+                  value={form.upgradedTo || ""}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Upgraded To"
+                />
               </label>
             </>
           )}
 
-          {/* BUTTONS */}
-          <div className="flex justify-between">
+          {/* Navigation buttons */}
+          <div className="flex justify-between items-center pt-4">
             {step > 1 && (
-              <button type="button" onClick={handlePrev} className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400">
+              <button
+                type="button"
+                onClick={handlePrev}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+              >
                 Back
               </button>
             )}
+
             {step < 3 && (
-              <button type="button" onClick={handleNext} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+              <button
+                type="button"
+                onClick={handleNext}
+                className="ml-auto px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
                 Next
               </button>
             )}
+
             {step === 3 && (
-              <button type="submit" disabled={loading} className="bg-green-700 text-white px-4 py-2 rounded-md hover:bg-green-800">
+              <button
+                type="submit"
+                disabled={loading}
+                className="ml-auto px-6 py-2 bg-green-700 text-white rounded hover:bg-green-800 disabled:opacity-50"
+              >
                 {loading ? "Submitting..." : "Submit"}
               </button>
             )}
           </div>
         </form>
 
-        {message && <p className="mt-3 text-sm text-center">{message}</p>}
+        {/* Message */}
+        {message && <p className="mt-3 text-sm text-center text-red-600">{message}</p>}
       </div>
     </div>
   );
