@@ -5,7 +5,7 @@ import Link from "next/link";
 import DataCompletionStats from "@/components/admin/DataCompletionStats";
 import OverallProgressSection from "@/components/admin/OverviewSection";
 import Header from "@/components/Header";
-import withAuth from "@/components/withAuth";
+
 import { useRouter } from "next/navigation";
 
 
