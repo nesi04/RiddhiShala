@@ -50,11 +50,6 @@ const Header = () => {
           </button>
         )}
 
-        {isAdminDashboard && (
-          <div className="h-10 w-10 rounded-full bg-green-100 border-2 border-green-700 flex items-center justify-center text-green-800 font-medium">
-            <Link href ='/admin/profile'>A</Link> 
-          </div>
-        )}
       </div>
     </header>
   );
