@@ -78,13 +78,8 @@ export default function AdminDashboard() {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <button
-            onClick={handleSettingsClick}
-            className="flex items-center justify-center bg-green-600 text-white py-3 rounded-lg shadow hover:bg-green-700 transition"
-          >
-            <Settings className="mr-2" size={18} /> Settings
-          </button>
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          
           <button
             onClick={handleActivityLogsClick}
             className="flex items-center justify-center border-2 bg-white border-green-500 text-green-700 py-3 rounded-lg shadow hover:bg-white transition"

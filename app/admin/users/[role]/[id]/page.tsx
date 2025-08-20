@@ -187,7 +187,7 @@ export default function UserRolePage() {
 
       {/* User Info */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6 p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        {(["name", "email", "phoneNumber", "district"] as ScalarFields[]).map(field => (
+        {(["name", "email", "phoneNumber", ] as ScalarFields[]).map(field => (
           <div key={field}>
             <label className="block text-sm font-medium text-gray-700 capitalize">{field}</label>
             <input
@@ -200,6 +200,39 @@ export default function UserRolePage() {
             />
           </div>
         ))}
+        <div>
+  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="district">
+    District
+  </label>
+  <select
+    id="district"
+    name="district"
+    value={formData?.district || ""}
+    disabled={!isEditing}
+    onChange={handleInputChange}
+    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+  >
+    <option value="">Select District</option>
+    {[
+      "East Garo Hills",
+      "East Khasi Hills",
+      "Jaintia Hills",
+      "Ri-Bhoi",
+      "South Garo Hills",
+      "West Garo Hills",
+      "West Khasi Hills",
+      "South West Garo Hills",
+      "North Garo Hills",
+      "South West Khasi Hills",
+      "East Jaintia Hills"
+    ].map((district) => (
+      <option key={district} value={district}>
+        {district}
+      </option>
+    ))}
+  </select>
+</div>
+
 
         {/* Role Dropdown */}
         <div>

@@ -7,12 +7,12 @@ import OverallProgressSection from "@/components/admin/OverviewSection";
 import Header from "@/components/Header";
 import withAuth from "@/components/withAuth";
 import { useRouter } from "next/navigation";
-import { logout } from "@/utils/auth";
+
 
 const App = () => {
   const router = useRouter();
   const handleLogout = () => {
-    logout();
+ 
     router.push('/login');
   };
   return (

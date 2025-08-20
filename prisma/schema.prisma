@@ -32,26 +32,42 @@ model Permission {
 // ---------------------- Users ----------------------
 
 model User {
-  id              Int          @id @default(autoincrement())
+  id              Int             @id @default(autoincrement())
   name            String
-  email           String       @unique
-  phoneNumber     String       @unique
-  password        String       // hashed password
+  email           String          @unique
+  phoneNumber     String?         @unique
+  password        String          // hashed password
   roleId          Int
-  role            Role         @relation(fields: [roleId], references: [id])
-  permissions     Permission[] @relation("UserPermissions")
-  joinDate        DateTime     @default(now())
+  role            Role            @relation(fields: [roleId], references: [id])
+  permissions     Permission[]    @relation("UserPermissions")
+  joinDate        DateTime        @default(now())
   lastActive      DateTime?
-  isDisabled      Boolean      @default(false)
+  isDisabled      Boolean         @default(false)
+  isVerified      Boolean         @default(false)   // 👈 needed by AuthService
   assignedSchools UserSchool[]
   address         String?
   bio             String?
   district        String?
 
+  // Relation with refresh tokens
+  refreshTokens   RefreshToken[]
+
   @@map("users")
-  
+}
 
+// ---------------------- Refresh Tokens ----------------------
 
+model RefreshToken {
+  id              Int      @id @default(autoincrement())
+  token           String   @unique
+  userId          Int
+  user            User     @relation(fields: [userId], references: [id])
+  createdAt       DateTime @default(now())
+  expiresAt       DateTime
+  revoked         Boolean  @default(false)
+  replacedByToken String?
+
+  @@map("refresh_tokens")
 }
 
 // ---------------------- User ↔ School (Many-to-Many) ----------------------
@@ -68,66 +84,69 @@ model UserSchool {
 // ---------------------- Schools ----------------------
 
 model School {
-  id                    Int            @id @default(autoincrement())
-  name                  String
-  yearOfEstablishment   Int?
-  upgradedTo            String?
-  udiseCode             String?
-  district              String?
-  block                 String?
-  cluster               String?
-  villageTown           String?
-  management            String?
-  schoolType            String?
-  mediumOfInstruction   String?
-  inclusiveSchool       Boolean        @default(false)
-  vocationalTrades      String?
-  coEducation           Boolean?
-  totalArea             String?
-  campusType            String?
-  campusSize            String?
-
-  // Role-specific relations
-  headOfSchool          HeadOfSchool?
-  teachers              Teacher[]
-  students              Student[]
-  dataEntryOperators    DataEntryOperator[]
-
-  // Infrastructure & Labs
-  infrastructures       Infrastructure[]
-  labs                  Lab[]
-
-  // PM-SHRI Pillars
-  pmShriPillars         PMShriPillar[]
-
-  // Innovations, Achievements, Challenges
-  innovations           Innovation[]
-  challenges            Challenge[]
-
-  assignedUsers         UserSchool[]
+  id                     Int            @id @default(autoincrement())
+  name                   String
+  status                 String         @default("Active") // Active/Inactive
+  established            Int?           // Year of establishment
+  upgradedYear           String?        // Year upgraded to current level
+  udiseCode              String?        @unique
+  district               String?
+  block                  String?
+  cluster                String?
+  village                String?        // Village/Town
+  management             String?        // School management type
+  type                   String?        // School type
+  medium                 String?        // Medium of instruction
+  inclusive              Boolean?       @default(false) // Facilities for CWSN
+  vocationalTrades       String[]       // Available vocational courses
+  coed                   Boolean?       @default(true) // Co-education status
+  totalArea              String?        // School campus size
+  principal              String?        // Head of School name
+  principalSince         String?        // Holding charge since
+  principalQualification String?        // Academic qualification
+  principalProfessionalQualification String? // Professional qualification
+  principalJoiningDate   String?        // Date of joining
+  principalExperience    String?        // Teaching experience
+  principalContact       String?        // Contact number
+  principalEmail         String?        // Email ID
+  midDayMeal             String?        // MDM status
+  drinkingWater          String?        // Water facility
+  electricity            String?        // Electricity status
+  internet               String?        // Internet availability
+  fireSafety             String?        // Fire safety measures
+  teacherPhotosDisplayed Boolean?       @default(false) // Whether teacher photos are displayed
+  
+  // Relations
+  enrollments          Enrollment[]
+  teachers             Teacher[]
+  infrastructures      Infrastructure[]
+  labs                 Lab[]
+  pillars              Pillar[]
+  innovations          Innovation[]
+  challenges           Challenge[]
+  assignedUsers        UserSchool[]
 
   @@map("schools")
   @@unique([name, district], name: "name_district")
 }
 
-// ---------------------- Role-Specific Models ----------------------
+// ---------------------- Enrollment Data ----------------------
 
-model HeadOfSchool {
-  id                        Int       @id @default(autoincrement())
-  schoolId                  Int       @unique
-  school                    School    @relation(fields: [schoolId], references: [id])
-  name                      String
-  designation               String?
-  holdingChargeSince        String?
-  academicQualification     String?
-  professionalQualification String?
-  dateOfJoining             DateTime?
-  teachingExperience        String?
-  contactNumber             String?
-  email                     String?
+model Enrollment {
+  id        Int     @id @default(autoincrement())
+  schoolId  Int
+  school    School  @relation(fields: [schoolId], references: [id])
+  class     String  // Class/Grade level
+  boys      Int?
+  girls     Int?
+  total     Int?
+  cwsn      Int?    // Children with Special Needs count
+  remarks   String?
 
-  @@map("head_of_school")
+  @@map("enrollments")
 }
+
+// ---------------------- Teachers ----------------------
 
 model Teacher {
   id                  Int      @id @default(autoincrement())
@@ -135,79 +154,58 @@ model Teacher {
   school              School   @relation(fields: [schoolId], references: [id])
   name                String
   gender              String?
-  subject             String?
+  mobile              String?  // Contact number
   qualification       String?
-  experience          String?
-  contactNumber       String?
-  email               String?
-  classesTaking       String?
-  attendedIECTraining Boolean?
+  section             String?  // LP & Primary/Upper-Primary/etc
+  classes             String?  // Classes they teach
+  subjects            String?  // Subjects they teach
+  iecTraining         String?  // IEC training status
+  experience          String?  // Teaching experience
 
   @@map("teachers")
 }
 
-model Student {
-  id            Int      @id @default(autoincrement())
-  schoolId      Int
-  school        School   @relation(fields: [schoolId], references: [id])
-  name          String
-  gender        String?
-  grade         String?
-  section       String?
-  dob           DateTime?
-  contactNumber String?
-  email         String?
-  cwsn          Boolean?
-
-  @@map("students")
-}
-
-model DataEntryOperator {
-  id            Int      @id @default(autoincrement())
-  schoolId      Int
-  school        School   @relation(fields: [schoolId], references: [id])
-  name          String
-  contactNumber String?
-  email         String?
-
-  @@map("data_entry_operators")
-}
-
-// ---------------------- Infrastructure & Labs ----------------------
+// ---------------------- Infrastructure ----------------------
 
 model Infrastructure {
   id        Int     @id @default(autoincrement())
   schoolId  Int
   school    School  @relation(fields: [schoolId], references: [id])
-  facility  String
-  quantity  Int?
-  status    String?
+  facility  String  // Type of facility
+  quantity  Int?    // Number available
+  status    String? // Condition/status
   remarks   String?
-  photoUrl  String?
+
+  @@map("infrastructures")
 }
+
+// ---------------------- Lab Facilities ----------------------
 
 model Lab {
   id        Int     @id @default(autoincrement())
   schoolId  Int
   school    School  @relation(fields: [schoolId], references: [id])
-  labType   String
-  available Boolean
-  equipment String?
+  type      String  // Lab type (Science, Computer, etc)
+  available Boolean @default(false)
+  equipment String? // Available equipment
   remarks   String?
-  photoUrl  String?
+
+  @@map("labs")
 }
 
-// ---------------------- PM-SHRI Pillars ----------------------
+// ---------------------- PM SHRI Pillars ----------------------
 
-model PMShriPillar {
+model Pillar {
   id           Int     @id @default(autoincrement())
   schoolId     Int
   school       School  @relation(fields: [schoolId], references: [id])
-  pillar       String
-  subAspect    String
-  observations String?
-  remarks      String?
-  photoUrl     String?
+  number       Int     // Pillar number (1-6)
+  title        String  // Pillar title
+  subAspect    String  // Specific aspect
+  observations String? // Findings
+  remarks      String? // Additional notes
+
+  @@map("pillars")
 }
 
 // ---------------------- Innovations & Achievements ----------------------
@@ -216,27 +214,34 @@ model Innovation {
   id          Int     @id @default(autoincrement())
   schoolId    Int
   school      School  @relation(fields: [schoolId], references: [id])
-  type        String  // Teaching innovation / Community knowledge / Award
-  description String
-  photoUrl    String?
+  type        String  // Teaching/Community/Award
+  description String  // Details
+  mediaUrl    String? // Supporting documents/photos
+
+  @@map("innovations")
 }
 
-// ---------------------- Challenges & Support ----------------------
+// ---------------------- Challenges ----------------------
 
 model Challenge {
   id            Int     @id @default(autoincrement())
   schoolId      Int
   school        School  @relation(fields: [schoolId], references: [id])
-  area          String
-  challenge     String
-  supportNeeded String?
+  area          String  // Area of challenge
+  challenge     String  // Description
+  supportNeeded String? // Required support
+
+  @@map("challenges")
 }
-model OtpVerification {
+
+// ---------------------- OTP Verification ----------------------
+
+model Otp {
   id        Int      @id @default(autoincrement())
-  email     String?
-  phone     String?
-  roleId    Int
+  email     String
   otp       String
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  @@map("otps")
 }
