@@ -23,7 +23,7 @@ export async function sendVerificationMail(email: string) {
     data: { email, otp: token, expiresAt },
   });
 
- const verifyUrl = `http://localhost:3000/verify?token=${token}&email=${email}`;
+ const verifyUrl = `https://riddhi-shala.vercel.app/verify?token=${token}&email=${email}`;
 
 
   await smtpTransporter.sendMail({
